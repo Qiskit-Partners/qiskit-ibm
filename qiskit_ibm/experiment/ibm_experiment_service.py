@@ -48,7 +48,7 @@ class IBMExperimentService:
     instance of this class, and the main syntax for using the service is
     ``provider.experiment.<action>``. For example::
 
-        from qiskit import IBMAccount
+        from qiskit_ibm import IBMAccount
         account = IBMAccount()
         provider = account.load_account()
 

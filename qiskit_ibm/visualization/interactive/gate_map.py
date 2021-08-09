@@ -69,7 +69,7 @@ def iplot_gate_map(
 
         .. jupyter-execute::
 
-           from qiskit import IBMAccount
+           from qiskit_ibm import IBMAccount
            from qiskit_ibm.visualization import iplot_gate_map
 
            account = IBMAccount()

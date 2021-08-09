@@ -30,7 +30,7 @@ class RuntimeProgram:
     You can use the :class:`~qiskit_ibm.runtime.IBMRuntimeService`
     to retrieve the metadata of a specific program or all programs. For example::
 
-        from qiskit import IBMAccount
+        from qiskit_ibm import IBMAccount
 
         account = IBMAccount()
         provider = account.load_account()

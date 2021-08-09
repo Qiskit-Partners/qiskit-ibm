@@ -38,7 +38,7 @@ Detailed information on a single backend
 
 .. jupyter-execute::
 
-    from qiskit import IBMAccount
+    from qiskit_ibm import IBMAccount
     import qiskit_ibm.jupyter
 
     account = IBMAccount()
@@ -62,7 +62,7 @@ IBM Quantum Experience (IQX) dashboard
 
 .. code-block:: python
 
-    from qiskit import IBMAccount
+    from qiskit_ibm import IBMAccount
     import qiskit_ibm.jupyter
 
     %iqx_dashboard

@@ -24,7 +24,7 @@ Modules related to Qiskit Runtime Service.
     The Qiskit Runtime service is not available to all providers. To check if your provider
     has access::
 
-        from qiskit import IBMAccount
+        from qiskit_ibm import IBMAccount
 
         account = IBMAccount()
         account.load_account()
@@ -63,7 +63,7 @@ Listing runtime programs
 
 To list all available runtime programs::
 
-    from qiskit import IBMAccount
+    from qiskit_ibm import IBMAccount
 
     account = IBMAccount()
     provider = account.load_account()
@@ -91,8 +91,8 @@ Invoking a runtime program
 You can use the :meth:`IBMRuntimeService.run` method to invoke a runtime program.
 For example::
 
-    from qiskit import IBMAccount, QuantumCircuit
-    from qiskit_ibm import RunnerResult
+    from qiskit import QuantumCircuit
+    from qiskit_ibm import IBMAccount, RunnerResult
 
 
     account = IBMAccount()
@@ -143,7 +143,8 @@ progress. You can choose to stream the interim results when you run the
 program by passing in the ``callback`` parameter, or at a later time using
 the :meth:`RuntimeJob.stream_results` method. For example::
 
-    from qiskit import IBMAccount, QuantumCircuit
+    from qiskit import QuantumCircuit
+    from qiskit_ibm import IBMAccount
 
     account = IBMAccount()
     provider = account.load_account()
@@ -192,7 +193,7 @@ is a sample file of program metadata.
 You can use the :meth:`IBMRuntimeService.upload_program` to upload a program.
 For example::
 
-    from qiskit import IBMAccount
+    from qiskit_ibm import IBMAccount
 
     account = IBMAccount()
     provider = account.load_account()

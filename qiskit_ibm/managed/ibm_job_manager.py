@@ -41,7 +41,8 @@ class IBMJobManager:
     You can use the :meth:`run()` method to submit multiple experiments
     with the Job Manager::
 
-        from qiskit import IBMAccount, transpile
+        from qiskit import transpile
+        from qiskit_ibm import IBMAccount
         from qiskit_ibm.managed import IBMJobManager
         from qiskit.circuit.random import random_circuit
 

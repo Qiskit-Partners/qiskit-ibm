@@ -21,7 +21,7 @@ The dashboard can be instantiated using
 
 .. jupyter-execute::
 
-    from qiskit import IBMAccount
+    from qiskit_ibm import IBMAccount
     import qiskit_ibm.jupyter
 
     account = IBMAccount()

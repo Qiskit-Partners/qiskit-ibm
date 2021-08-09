@@ -66,7 +66,7 @@ def iplot_error_map(
 
         .. jupyter-execute::
 
-           from qiskit import IBMAccount
+           from qiskit_ibm import IBMAccount
            from qiskit_ibm.visualization import iplot_error_map
 
            account = IBMAccount()

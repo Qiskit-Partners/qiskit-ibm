@@ -53,7 +53,7 @@ class IBMProvider(Provider):
     :meth:`IBMAccount.enable_account()<IBMAccount.enable_account>` method, which
     returns the default provider you have access to::
 
-        from qiskit import IBMAccount
+        from qiskit_ibm import IBMAccount
         account = IBMAccount()
         provider = account.enable_account(<INSERT_IBM_QUANTUM_EXPERIENCE_TOKEN>)
 
