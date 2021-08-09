@@ -161,7 +161,7 @@ def write_qiskit_rc(
     def _section_name(credentials_: Credentials) -> str:
         """Return a string suitable for use as a unique section name."""
         base_name = 'ibmq'
-        if credentials_.is_ibmq():
+        if credentials_.is_ibm_quantum():
             base_name = '{}_{}_{}_{}'.format(base_name,
                                              *credentials_.unique_id().to_tuple())
         return base_name

@@ -18,13 +18,13 @@ from typing import Union
 import ipywidgets as wid
 from qiskit.test.mock.fake_backend import FakeBackend
 from qiskit_ibm.visualization.interactive import iplot_gate_map
-from qiskit_ibm.ibmqbackend import IBMQBackend
+from qiskit_ibm.ibm_backend import IBMBackend
 from qiskit_ibm.utils.converters import duration_difference
 
 from .utils import get_next_reservation
 
 
-def config_tab(backend: Union[IBMQBackend, FakeBackend]) -> wid.GridBox:
+def config_tab(backend: Union[IBMBackend, FakeBackend]) -> wid.GridBox:
     """The backend configuration widget.
 
     Args:

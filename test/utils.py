@@ -24,10 +24,10 @@ from qiskit.test.reference_circuits import ReferenceCircuits
 from qiskit.pulse import Schedule
 from qiskit.providers.exceptions import JobError
 from qiskit.providers.jobstatus import JobStatus
-from qiskit_ibm.ibmqfactory import IBMQFactory
-from qiskit_ibm.accountprovider import AccountProvider
-from qiskit_ibm.ibmqbackend import IBMQBackend
-from qiskit_ibm.job import IBMQJob
+from qiskit_ibm.account import IBMAccount
+from qiskit_ibm.ibm_provider import IBMProvider
+from qiskit_ibm.ibm_backend import IBMBackend
+from qiskit_ibm.job import IBMJob
 
 
 def setup_test_logging(logger: logging.Logger, filename: str):
@@ -56,7 +56,7 @@ def setup_test_logging(logger: logging.Logger, filename: str):
     logger.setLevel(os.getenv('LOG_LEVEL', 'DEBUG'))
 
 
-def most_busy_backend(provider: AccountProvider) -> IBMQBackend:
+def most_busy_backend(provider: IBMProvider) -> IBMBackend:
     """Return the most busy backend for the provider given.
 
     Return the most busy available backend for those that
@@ -74,7 +74,7 @@ def most_busy_backend(provider: AccountProvider) -> IBMQBackend:
                key=lambda b: b.status().pending_jobs)
 
 
-def get_large_circuit(backend: IBMQBackend) -> QuantumCircuit:
+def get_large_circuit(backend: IBMBackend) -> QuantumCircuit:
     """Return a slightly larger circuit that would run a bit longer.
 
     Args:
@@ -93,7 +93,7 @@ def get_large_circuit(backend: IBMQBackend) -> QuantumCircuit:
     return circuit
 
 
-def bell_in_qobj(backend: IBMQBackend, shots: int = 1024) -> QasmQobj:
+def bell_in_qobj(backend: IBMBackend, shots: int = 1024) -> QasmQobj:
     """Return a bell circuit in Qobj format.
 
     Args:
@@ -107,7 +107,7 @@ def bell_in_qobj(backend: IBMQBackend, shots: int = 1024) -> QasmQobj:
                     backend=backend, shots=shots)
 
 
-def cancel_job(job: IBMQJob, verify: bool = False) -> bool:
+def cancel_job(job: IBMJob, verify: bool = False) -> bool:
     """Cancel a job.
 
     Args:
@@ -135,7 +135,7 @@ def cancel_job(job: IBMQJob, verify: bool = False) -> bool:
     return cancelled
 
 
-def submit_job_bad_shots(backend: IBMQBackend) -> IBMQJob:
+def submit_job_bad_shots(backend: IBMBackend) -> IBMJob:
     """Submit a job that will fail due to too many shots.
 
     Args:
@@ -150,7 +150,7 @@ def submit_job_bad_shots(backend: IBMQBackend) -> IBMQJob:
     return job_to_fail
 
 
-def submit_job_one_bad_instr(backend: IBMQBackend) -> IBMQJob:
+def submit_job_one_bad_instr(backend: IBMBackend) -> IBMJob:
     """Submit a job that contains one good and one bad instruction.
 
     Args:
@@ -166,7 +166,7 @@ def submit_job_one_bad_instr(backend: IBMQBackend) -> IBMQJob:
     return job
 
 
-def submit_and_cancel(backend: IBMQBackend) -> IBMQJob:
+def submit_and_cancel(backend: IBMBackend) -> IBMJob:
     """Submit and cancel a job.
 
     Args:
@@ -181,7 +181,7 @@ def submit_and_cancel(backend: IBMQBackend) -> IBMQJob:
     return job
 
 
-def get_pulse_schedule(backend: IBMQBackend) -> Schedule:
+def get_pulse_schedule(backend: IBMBackend) -> Schedule:
     """Return a pulse schedule."""
     config = backend.configuration()
     defaults = backend.defaults()
@@ -197,15 +197,15 @@ def get_pulse_schedule(backend: IBMQBackend) -> Schedule:
 
 
 def get_provider(
-        ibmq_factory: IBMQFactory,
+        account: IBMAccount,
         qe_token: str,
         qe_url: str,
         default: bool = True
-) -> AccountProvider:
+) -> IBMProvider:
     """Return a provider for the account.
 
     Args:
-        ibmq_factory: An `IBMQFactory` instance.
+        account: An `IBMAccount` instance.
         qe_token: IBM Quantum Experience token.
         qe_url: IBM Quantum Experience auth URL.
         default: If `True`, the default open access project provider is returned.
@@ -214,21 +214,21 @@ def get_provider(
     Returns:
         A provider, as specified by `default`.
     """
-    provider_to_return = ibmq_factory.enable_account(qe_token, url=qe_url)  # Default provider.
+    provider_to_return = account.enable_account(qe_token, url=qe_url)  # Default provider.
     if not default:
         # Get a non default provider (i.e.not the default open access project).
-        providers = ibmq_factory.providers()
+        providers = account.providers()
         for provider in providers:
             if provider != provider_to_return:
                 provider_to_return = provider
                 break
-    ibmq_factory.disable_account()
+    account.disable_account()
 
     return provider_to_return
 
 
 def update_job_tags_and_verify(
-        job_to_update: IBMQJob,
+        job_to_update: IBMJob,
         tags_after_update: List[str],
         replacement_tags: Optional[List[str]] = None,
         additional_tags: Optional[List[str]] = None,

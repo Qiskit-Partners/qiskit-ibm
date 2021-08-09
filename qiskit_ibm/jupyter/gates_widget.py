@@ -18,10 +18,10 @@ from typing import Union
 
 import ipywidgets as wid
 from qiskit.test.mock.fake_backend import FakeBackend
-from qiskit_ibm.ibmqbackend import IBMQBackend
+from qiskit_ibm.ibm_backend import IBMBackend
 
 
-def gates_tab(backend: Union[IBMQBackend, FakeBackend]) -> wid.GridBox:
+def gates_tab(backend: Union[IBMBackend, FakeBackend]) -> wid.GridBox:
     """Construct the multiple qubit gate error widget.
 
     Args:

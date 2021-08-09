@@ -16,7 +16,7 @@ from typing import Dict, List, Generator, Any
 from contextlib import contextmanager
 
 from ..api.exceptions import ApiError
-from .exceptions import IBMQJobApiError
+from .exceptions import IBMJobApiError
 
 
 def build_error_report(results: List[Dict[str, Any]]) -> str:
@@ -52,8 +52,8 @@ def get_cancel_status(cancel_response: Dict[str, Any]) -> bool:
 
 @contextmanager
 def api_to_job_error() -> Generator[None, None, None]:
-    """Convert an ``ApiError`` to an ``IBMQJobApiError``."""
+    """Convert an ``ApiError`` to an ``IBMJobApiError``."""
     try:
         yield
     except ApiError as api_err:
-        raise IBMQJobApiError(str(api_err)) from api_err
+        raise IBMJobApiError(str(api_err)) from api_err

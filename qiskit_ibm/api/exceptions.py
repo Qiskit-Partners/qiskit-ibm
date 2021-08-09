@@ -12,10 +12,10 @@
 
 """Exceptions related to the IBM Quantum Experience API."""
 
-from ..exceptions import IBMQError
+from ..exceptions import IBMError
 
 
-class ApiError(IBMQError):
+class ApiError(IBMError):
     """Generic IBM Quantum Experience API error."""
     pass
 
@@ -39,7 +39,7 @@ class WebsocketError(ApiError):
     pass
 
 
-class WebsocketIBMQProtocolError(WebsocketError):
+class WebsocketIBMProtocolError(WebsocketError):
     """Exceptions related to IBM Quantum protocol error."""
     pass
 
@@ -64,7 +64,7 @@ class AuthenticationLicenseError(ApiError):
     pass
 
 
-class ApiIBMQProtocolError(ApiError):
+class ApiIBMProtocolError(ApiError):
     """Exception related to IBM Quantum API protocol error."""
     pass
 

@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Context managers for using with IBMQProvider unit tests."""
+"""Context managers for using with IBM Provider unit tests."""
 
 import os
 from typing import Optional, Dict
@@ -20,7 +20,7 @@ from unittest.mock import patch
 
 from qiskit_ibm.credentials import configrc, Credentials
 from qiskit_ibm.credentials.environ import VARIABLES_MAP
-from qiskit_ibm import IBMQFactory
+from qiskit_ibm import IBMAccount
 
 CREDENTIAL_ENV_VARS = VARIABLES_MAP.keys()
 
@@ -128,12 +128,12 @@ def _mocked_initialize_provider(
 
 
 @contextmanager
-def mock_ibmq_provider():
-    """Mock the initialization of ``IBMQFactory``, so it does not query the API."""
-    patcher = patch.object(IBMQFactory, '_initialize_providers',
+def mock_ibm_provider():
+    """Mock the initialization of ``IBMAccount``, so it does not query the API."""
+    patcher = patch.object(IBMAccount, '_initialize_providers',
                            side_effect=_mocked_initialize_provider,
                            autospec=True)
-    patcher2 = patch.object(IBMQFactory, '_check_api_version',
+    patcher2 = patch.object(IBMAccount, '_check_api_version',
                             return_value={'new_api': True, 'api-auth': '0.1'})
     patcher.start()
     patcher2.start()

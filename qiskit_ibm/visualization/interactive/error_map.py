@@ -20,7 +20,7 @@ import numpy as np
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import matplotlib as mpl
-from qiskit_ibm.ibmqbackend import IBMQBackend
+from qiskit_ibm.ibm_backend import IBMBackend
 
 from .plotly_wrapper import PlotlyWidget, PlotlyFigure
 from ..device_layouts import DEVICE_LAYOUTS
@@ -30,7 +30,7 @@ from ..exceptions import VisualizationValueError, VisualizationTypeError
 
 
 def iplot_error_map(
-        backend: IBMQBackend,
+        backend: IBMBackend,
         figsize: Tuple[int] = (800, 500),
         show_title: bool = True,
         remove_badcal_edges: bool = True,
@@ -66,12 +66,13 @@ def iplot_error_map(
 
         .. jupyter-execute::
 
-           from qiskit import IBMQ
+           from qiskit import IBMAccount
            from qiskit_ibm.visualization import iplot_error_map
 
-           IBMQ.load_account()
+           account = IBMAccount()
+           account.load_account()
 
-           provider = IBMQ.get_provider(group='open', project='main')
+           provider = account.get_provider(group='open', project='main')
            backend = provider.get_backend('ibmq_vigo')
 
            iplot_error_map(backend, as_widget=True)

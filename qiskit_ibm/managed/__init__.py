@@ -23,7 +23,7 @@ Classes
 .. autosummary::
    :toctree: ../stubs/
 
-   IBMQJobManager
+   IBMJobManager
    ManagedJobSet
    ManagedJob
    ManagedResults
@@ -33,15 +33,15 @@ Exceptions
 .. autosummary::
    :toctree: ../stubs/
 
-   IBMQJobManagerError
-   IBMQJobManagerInvalidStateError
-   IBMQJobManagerTimeoutError
-   IBMQJobManagerJobNotFound
-   IBMQManagedResultDataNotAvailable
-   IBMQJobManagerUnknownJobSet
+   IBMJobManagerError
+   IBMJobManagerInvalidStateError
+   IBMJobManagerTimeoutError
+   IBMJobManagerJobNotFound
+   IBMManagedResultDataNotAvailable
+   IBMJobManagerUnknownJobSet
 """
 
-from .ibmqjobmanager import IBMQJobManager
+from .ibm_job_manager import IBMJobManager
 from .managedjobset import ManagedJobSet
 from .managedjob import ManagedJob
 from .managedresults import ManagedResults

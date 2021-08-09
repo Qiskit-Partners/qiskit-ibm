@@ -17,7 +17,7 @@ from typing import List, Any
 from abc import ABC, abstractmethod
 
 
-from qiskit_ibm import accountprovider  # pylint: disable=unused-import
+from qiskit_ibm import ibm_provider  # pylint: disable=unused-import
 from ..api.clients.random import RandomClient
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class BaseRandomService(ABC):
     def __init__(
             self,
             name: str,
-            provider: 'accountprovider.AccountProvider',
+            provider: 'ibm_provider.IBMProvider',
             client: RandomClient,
             methods: List
     ):

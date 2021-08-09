@@ -12,7 +12,7 @@
 
 """Fake AccountClient."""
 
-# TODO This can probably be merged with the one in test_ibmq_job_states
+# TODO This can probably be merged with the one in test_ibm_job_states
 import time
 import copy
 from random import randrange

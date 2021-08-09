@@ -17,7 +17,7 @@ from datetime import datetime
 
 import ipywidgets as widgets
 
-from qiskit_ibm.job.ibmqjob import IBMQJob
+from qiskit_ibm.job.ibm_job import IBMJob
 
 
 def make_clear_button(watcher: 'IQXDashboard') -> widgets.GridBox:
@@ -74,7 +74,7 @@ def make_labels() -> widgets.HBox:
 
 
 def create_job_widget(watcher: 'IQXDashboard',
-                      job: IBMQJob,
+                      job: IBMJob,
                       backend: str,
                       status: str = '',
                       queue_pos: Optional[int] = None,

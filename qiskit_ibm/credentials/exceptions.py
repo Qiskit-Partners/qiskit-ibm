@@ -12,10 +12,10 @@
 
 """Exception for the ``Credentials`` module."""
 
-from ..exceptions import IBMQError
+from ..exceptions import IBMError
 
 
-class CredentialsError(IBMQError):
+class CredentialsError(IBMError):
     """Base class for errors raised during credential management."""
     pass
 
@@ -30,7 +30,7 @@ class CredentialsNotFoundError(CredentialsError):
     pass
 
 
-class HubGroupProjectError(IBMQError):
+class HubGroupProjectError(IBMError):
     """Base class for errors raised by the hubgroupproject module."""
     pass
 

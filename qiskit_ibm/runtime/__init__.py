@@ -24,10 +24,11 @@ Modules related to Qiskit Runtime Service.
     The Qiskit Runtime service is not available to all providers. To check if your provider
     has access::
 
-        from qiskit import IBMQ
+        from qiskit import IBMAccount
 
-        IBMQ.load_account()
-        provider = IBMQ.get_provider(...)
+        account = IBMAccount()
+        account.load_account()
+        provider = account.get_provider(...)
 
         can_use_runtime = provider.has_service('runtime')
 
@@ -62,9 +63,10 @@ Listing runtime programs
 
 To list all available runtime programs::
 
-    from qiskit import IBMQ
+    from qiskit import IBMAccount
 
-    provider = IBMQ.load_account()
+    account = IBMAccount()
+    provider = account.load_account()
 
     # List all available programs.
     provider.runtime.pprint_programs()
@@ -89,11 +91,12 @@ Invoking a runtime program
 You can use the :meth:`IBMRuntimeService.run` method to invoke a runtime program.
 For example::
 
-    from qiskit import IBMQ, QuantumCircuit
+    from qiskit import IBMAccount, QuantumCircuit
     from qiskit_ibm import RunnerResult
 
 
-    provider = IBMQ.load_account()
+    account = IBMAccount()
+    provider = account.load_account()
     backend = provider.backend.ibmq_qasm_simulator
 
     # Create a circuit.
@@ -130,7 +133,7 @@ program, a
 :class:`RuntimeJob` instance is returned. This class has all the basic job
 methods, such as :meth:`RuntimeJob.status`, :meth:`RuntimeJob.result`, and
 :meth:`RuntimeJob.cancel`. Note that it does not have the same methods as regular
-circuit jobs, which are instances of :class:`~qiskit_ibm.job.IBMQJob`.
+circuit jobs, which are instances of :class:`~qiskit_ibm.job.IBMJob`.
 
 Interim results
 ---------------
@@ -140,9 +143,10 @@ progress. You can choose to stream the interim results when you run the
 program by passing in the ``callback`` parameter, or at a later time using
 the :meth:`RuntimeJob.stream_results` method. For example::
 
-    from qiskit import IBMQ, QuantumCircuit
+    from qiskit import IBMAccount, QuantumCircuit
 
-    provider = IBMQ.load_account()
+    account = IBMAccount()
+    provider = account.load_account()
     backend = provider.backend.ibmq_qasm_simulator
 
     def interim_result_callback(job_id, interim_result):
@@ -174,7 +178,7 @@ is a :class:`ProgramBackend` instance whose :meth:`ProgramBackend.run` method
 can be used to submit circuits. The ``user_messenger`` is a :class:`UserMessenger`
 instance whose :meth:`UserMessenger.publish` method can be used to publish interim and
 final results.
-See `qiskit/providers/ibmq/runtime/program/program_template.py` for a program data
+See `qiskit_ibm/runtime/program/program_template.py` for a program data
 template file.
 
 Each program metadata must include at least the program name, description, and
@@ -182,15 +186,16 @@ maximum execution time. You can find description of each metadata field in
 the :meth:`IBMRuntimeService.upload_program` method. Instead of passing in
 the metadata fields individually, you can pass in a JSON file or a dictionary
 to :meth:`IBMRuntimeService.upload_program` via the ``metadata`` parameter.
-`qiskit/providers/ibmq/runtime/program/program_metadata_sample.json`
+`qiskit_ibm/runtime/program/program_metadata_sample.json`
 is a sample file of program metadata.
 
 You can use the :meth:`IBMRuntimeService.upload_program` to upload a program.
 For example::
 
-    from qiskit import IBMQ
+    from qiskit import IBMAccount
 
-    provider = IBMQ.load_account()
+    account = IBMAccount()
+    provider = account.load_account()
     program_id = provider.runtime.upload_program(
                     data="my_vqe.py",
                     metadata="my_vqe_metadata.json",
@@ -206,7 +211,7 @@ Method :meth:`IBMRuntimeService.delete_program` allows you to delete a
 program.
 
 Files related to writing a runtime program are in the
-``qiskit/providers/ibmq/runtime/program`` directory.
+``qiskit_ibm/runtime/program`` directory.
 
 
 Classes

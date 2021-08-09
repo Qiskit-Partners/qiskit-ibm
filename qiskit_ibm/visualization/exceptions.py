@@ -12,10 +12,10 @@
 
 """Exceptions related to the visualization modules."""
 
-from ..exceptions import IBMQError
+from ..exceptions import IBMError
 
 
-class VisualizationError(IBMQError):
+class VisualizationError(IBMError):
     """Base class for errors raised by the visualization modules."""
     pass
 

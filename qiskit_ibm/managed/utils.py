@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Utility functions for ``IBMQJobManager``."""
+"""Utility functions for ``IBMJobManager``."""
 
 import re
 from typing import Callable, Any, List, Union

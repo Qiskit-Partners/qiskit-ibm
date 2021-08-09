@@ -12,10 +12,10 @@
 
 """Exceptions related to IBM Quantum Experience experiments."""
 
-from ..exceptions import IBMQError
+from ..exceptions import IBMError
 
 
-class IBMExperimentError(IBMQError):
+class IBMExperimentError(IBMError):
     """Base class for errors raised by the experiment service modules."""
     pass
 

@@ -36,7 +36,7 @@ class Account(RestAdapterBase):
         'jobs_status': '/Jobs/status/v/1',
     }
 
-    TEMPLATE_IBMQ_HUBS = '/Network/{hub}/Groups/{group}/Projects/{project}'
+    TEMPLATE_IBM_HUBS = '/Network/{hub}/Groups/{group}/Projects/{project}'
     """str: Template for creating an IBM Quantum Experience URL with
     hub/group/project information."""
 
@@ -49,7 +49,7 @@ class Account(RestAdapterBase):
             group: The group to use.
             project: The project to use.
         """
-        self.url_prefix = self.TEMPLATE_IBMQ_HUBS.format(hub=hub, group=group, project=project)
+        self.url_prefix = self.TEMPLATE_IBM_HUBS.format(hub=hub, group=group, project=project)
         super().__init__(session, self.url_prefix)
 
     # Function-specific rest adapters.

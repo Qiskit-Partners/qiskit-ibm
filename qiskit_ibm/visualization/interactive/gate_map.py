@@ -15,14 +15,14 @@
 from typing import Tuple, Union, Optional, List
 
 import plotly.graph_objects as go
-from qiskit_ibm.ibmqbackend import IBMQBackend
+from qiskit_ibm.ibm_backend import IBMBackend
 
 from .plotly_wrapper import PlotlyWidget, PlotlyFigure
 from ..device_layouts import DEVICE_LAYOUTS
 
 
 def iplot_gate_map(
-        backend: IBMQBackend,
+        backend: IBMBackend,
         figsize: Tuple[Optional[int], Optional[int]] = (None, None),
         label_qubits: bool = True,
         qubit_size: Optional[float] = None,
@@ -69,12 +69,13 @@ def iplot_gate_map(
 
         .. jupyter-execute::
 
-           from qiskit import IBMQ
+           from qiskit import IBMAccount
            from qiskit_ibm.visualization import iplot_gate_map
 
-           IBMQ.load_account()
+           account = IBMAccount()
+           account.load_account()
 
-           provider = IBMQ.get_provider(group='open', project='main')
+           provider = account.get_provider(group='open', project='main')
            backend = provider.get_backend('ibmq_vigo')
 
            iplot_gate_map(backend, as_widget=True)

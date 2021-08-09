@@ -1,6 +1,6 @@
 # This code is part of Qiskit.
 #
-# (C) Copyright IBM 2018, 2019.
+# (C) Copyright IBM 2021.
 #
 # This code is licensed under the Apache License, Version 2.0. You may
 # obtain a copy of this license in the LICENSE.txt file in the root directory
@@ -10,90 +10,90 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Exceptions related to the IBM Quantum Experience provider."""
+"""Exceptions related to the IBM Quantum provider."""
 
 from qiskit.exceptions import QiskitError
 
 
-class IBMQError(QiskitError):
+class IBMError(QiskitError):
     """Base class for errors raised by the provider modules."""
     pass
 
 
-class IBMQAccountError(IBMQError):
+class IBMAccountError(IBMError):
     """Base class for errors raised by account management."""
     pass
 
 
-class IBMQAccountValueError(IBMQError):
+class IBMAccountValueError(IBMError):
     """Value errors raised by account management."""
 
 
-class IBMQAccountCredentialsNotFound(IBMQAccountError):
+class IBMAccountCredentialsNotFound(IBMAccountError):
     """Errors raised when credentials are not found."""
     pass
 
 
-class IBMQAccountCredentialsInvalidFormat(IBMQAccountError):
+class IBMAccountCredentialsInvalidFormat(IBMAccountError):
     """Errors raised when the credentials format is invalid."""
     pass
 
 
-class IBMQAccountCredentialsInvalidToken(IBMQAccountError):
+class IBMAccountCredentialsInvalidToken(IBMAccountError):
     """Errors raised when an IBM Quantum Experience token is invalid."""
     pass
 
 
-class IBMQAccountCredentialsInvalidUrl(IBMQAccountError):
+class IBMAccountCredentialsInvalidUrl(IBMAccountError):
     """Errors raised when an IBM Quantum Experience URL is invalid."""
     pass
 
 
-class IBMQAccountMultipleCredentialsFound(IBMQAccountError):
+class IBMAccountMultipleCredentialsFound(IBMAccountError):
     """Errors raised when multiple credentials are found."""
     pass
 
 
-class IBMQProviderError(IBMQAccountError):
+class IBMProviderError(IBMAccountError):
     """Errors related to provider handling."""
     pass
 
 
-class IBMQBackendError(IBMQError):
+class IBMBackendError(IBMError):
     """Base class for errors raised by the backend modules."""
     pass
 
 
-class IBMQBackendApiError(IBMQBackendError):
+class IBMBackendApiError(IBMBackendError):
     """Errors that occur unexpectedly when querying the server."""
     pass
 
 
-class IBMQBackendApiProtocolError(IBMQBackendApiError):
+class IBMBackendApiProtocolError(IBMBackendApiError):
     """Errors raised when an unexpected value is received from the server."""
     pass
 
 
-class IBMQBackendValueError(IBMQBackendError, ValueError):
+class IBMBackendValueError(IBMBackendError, ValueError):
     """Value errors raised by the backend modules."""
     pass
 
 
-class IBMQBackendJobLimitError(IBMQBackendError):
+class IBMBackendJobLimitError(IBMBackendError):
     """Errors raised when job limit is reached."""
     pass
 
 
-class IBMQInputValueError(IBMQError):
+class IBMInputValueError(IBMError):
     """Error raised due to invalid input value."""
     pass
 
 
-class IBMQNotAuthorizedError(IBMQError):
+class IBMNotAuthorizedError(IBMError):
     """Error raised when a service is invoked from an unauthorized account."""
     pass
 
 
-class IBMQApiError(IBMQError):
+class IBMApiError(IBMError):
     """Error raised when a server error encountered."""
     pass

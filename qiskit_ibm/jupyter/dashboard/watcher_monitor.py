@@ -17,13 +17,13 @@ import time
 import threading
 
 from qiskit.providers.jobstatus import JobStatus
-from qiskit_ibm.job.ibmqjob import IBMQJob
+from qiskit_ibm.job.ibm_job import IBMJob
 
 from ...utils.converters import duration_difference
 
 
-def _job_monitor(job: IBMQJob, status: JobStatus, watcher: 'IQXDashboard') -> None:
-    """Monitor the status of an ``IBMQJob`` instance.
+def _job_monitor(job: IBMJob, status: JobStatus, watcher: 'IQXDashboard') -> None:
+    """Monitor the status of an ``IBMJob`` instance.
 
     Args:
         job: Job to monitor.
@@ -34,7 +34,7 @@ def _job_monitor(job: IBMQJob, status: JobStatus, watcher: 'IQXDashboard') -> No
     thread.start()
 
 
-def _job_checker(job: IBMQJob, status: JobStatus, watcher: 'IQXDashboard') -> None:
+def _job_checker(job: IBMJob, status: JobStatus, watcher: 'IQXDashboard') -> None:
     """A simple job status checker.
 
     Args:

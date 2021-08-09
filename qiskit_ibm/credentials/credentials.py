@@ -20,13 +20,13 @@ from requests_ntlm import HttpNtlmAuth
 from .hubgroupproject import HubGroupProject
 
 
-REGEX_IBMQ_HUBS = (
+REGEX_IBM_HUBS = (
     '(?P<prefix>http[s]://.+/api)'
     '/Hubs/(?P<hub>[^/]+)/Groups/(?P<group>[^/]+)/Projects/(?P<project>[^/]+)'
 )
 """str: Regex that matches an IBM Quantum Experience URL with hub information."""
 
-TEMPLATE_IBMQ_HUBS = '{prefix}/Network/{hub}/Groups/{group}/Projects/{project}'
+TEMPLATE_IBM_HUBS = '{prefix}/Network/{hub}/Groups/{group}/Projects/{project}'
 """str: Template for creating an IBM Quantum Experience URL with hub/group/project information."""
 
 
@@ -73,7 +73,7 @@ class Credentials:
         self.token = token
         self.access_token = access_token
         (self.url, self.base_url,
-         self.hub, self.group, self.project) = _unify_ibmq_url(
+         self.hub, self.group, self.project) = _unify_ibm_quantum_url(
              url, hub, group, project)
         self.websockets_url = websockets_url
         self.proxies = proxies or {}
@@ -87,8 +87,8 @@ class Credentials:
         self.experiment_url = services.get('resultsDB', None)
         self.runtime_url = services.get('runtime', None)
 
-    def is_ibmq(self) -> bool:
-        """Return whether the credentials represent an IBM Quantum Experience account."""
+    def is_ibm_quantum(self) -> bool:
+        """Return whether the credentials represent an IBM Quantum account."""
         return all([self.hub, self.group, self.project])
 
     def __eq__(self, other: object) -> bool:
@@ -132,7 +132,7 @@ class Credentials:
         return request_kwargs
 
 
-def _unify_ibmq_url(
+def _unify_ibm_quantum_url(
         url: str,
         hub: Optional[str] = None,
         group: Optional[str] = None,
@@ -159,15 +159,15 @@ def _unify_ibmq_url(
             * project: The project to use.
     """
     # Check if the URL is "new style", and retrieve embedded parameters from it.
-    regex_match = re.match(REGEX_IBMQ_HUBS, url, re.IGNORECASE)
+    regex_match = re.match(REGEX_IBM_HUBS, url, re.IGNORECASE)
     base_url = url
     if regex_match:
         base_url, hub, group, project = regex_match.groups()
     else:
         if hub and group and project:
-            # Assume it is an IBMQ URL, and update the url.
-            url = TEMPLATE_IBMQ_HUBS.format(prefix=url, hub=hub, group=group,
-                                            project=project)
+            # Assume it is an IBM Quantum URL, and update the url.
+            url = TEMPLATE_IBM_HUBS.format(prefix=url, hub=hub, group=group,
+                                           project=project)
         else:
             # Cleanup the hub, group and project, without modifying the url.
             hub = group = project = None

@@ -21,10 +21,11 @@ The dashboard can be instantiated using
 
 .. jupyter-execute::
 
-    from qiskit import IBMQ
+    from qiskit import IBMAccount
     import qiskit_ibm.jupyter
 
-    IBMQ.load_account()
+    account = IBMAccount()
+    account.load_account()
 
     %iqx_dashboard
 

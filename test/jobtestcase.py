@@ -16,10 +16,10 @@ import time
 
 from qiskit.providers import JobStatus
 
-from .ibmqtestcase import IBMQTestCase
+from .ibm_test_case import IBMTestCase
 
 
-class JobTestCase(IBMQTestCase):
+class JobTestCase(IBMTestCase):
     """Include common functionality when testing jobs."""
 
     def wait_for_initialization(self, job, timeout=1):

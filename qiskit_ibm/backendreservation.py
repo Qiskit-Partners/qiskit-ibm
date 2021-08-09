@@ -20,7 +20,7 @@ class BackendReservation:
     """Reservation information for a backend.
 
     Represent a reservation for a backend. This instance is returned by
-    the :meth:`IBMQBackend.reservations` method. Some of the attributes are
+    the :meth:`IBMBackend.reservations` method. Some of the attributes are
     only available if you're the owner of the reservation.
 
     Attributes:

@@ -26,12 +26,12 @@ The IBM Quantum Provider uses the ``qiskit_ibm`` logger.
 
 Two environment variables can be used to control the logging:
 
-    * ``QISKIT_IBMQ_PROVIDER_LOG_LEVEL``: Specifies the log level to use, for the
-      ibmq-provider modules. If an invalid level is set, the log level defaults to ``WARNING``.
+    * ``QISKIT_IBM_PROVIDER_LOG_LEVEL``: Specifies the log level to use, for the Qiskit
+      IBM provider modules. If an invalid level is set, the log level defaults to ``WARNING``.
       The valid log levels are ``DEBUG``, ``INFO``, ``WARNING``, ``ERROR``, and ``CRITICAL``
       (case-insensitive). If the environment variable is not set, then the parent logger's level
       is used, which also defaults to ``WARNING``.
-    * ``QISKIT_IBMQ_PROVIDER_LOG_FILE``: Specifies the name of the log file to use. If specified,
+    * ``QISKIT_IBM_PROVIDER_LOG_FILE``: Specifies the name of the log file to use. If specified,
       messages will be logged to the file only. Otherwise messages will be logged to the standard
       error (usually the screen).
 
@@ -53,11 +53,11 @@ Classes
 .. autosummary::
     :toctree: ../stubs/
 
-    AccountProvider
+    IBMProvider
     BackendJobLimit
-    IBMQBackend
-    IBMQBackendService
-    IBMQFactory
+    IBMBackend
+    IBMBackendService
+    IBMAccount
     RunnerResult
 
 Exceptions
@@ -65,18 +65,19 @@ Exceptions
 .. autosummary::
     :toctree: ../stubs/
 
-    IBMQError
-    IBMQAccountError
-    IBMQAccountCredentialsNotFound
-    IBMQAccountCredentialsInvalidFormat
-    IBMQAccountCredentialsInvalidToken
-    IBMQAccountCredentialsInvalidUrl
-    IBMQAccountMultipleCredentialsFound
-    IBMQBackendError
-    IBMQBackendApiError
-    IBMQBackendApiProtocolError
-    IBMQBackendValueError
-    IBMQProviderError
+    IBMError
+    IBMAccountError
+    IBMAccountValueError
+    IBMAccountCredentialsNotFound
+    IBMAccountCredentialsInvalidFormat
+    IBMAccountCredentialsInvalidToken
+    IBMAccountCredentialsInvalidUrl
+    IBMAccountMultipleCredentialsFound
+    IBMBackendError
+    IBMBackendApiError
+    IBMBackendApiProtocolError
+    IBMBackendValueError
+    IBMProviderError
 """
 
 import logging
@@ -85,14 +86,14 @@ from datetime import datetime, timedelta
 
 from qiskit.providers import BaseBackend, Backend  # type: ignore[attr-defined]
 
-from .ibmqfactory import IBMQFactory
-from .ibmqbackend import IBMQBackend
-from .job import IBMQJob  # pylint: disable=cyclic-import
-from .managed import IBMQJobManager  # pylint: disable=cyclic-import
-from .accountprovider import AccountProvider
+from .ibm_account import IBMAccount
+from .ibm_backend import IBMBackend
+from .job import IBMJob  # pylint: disable=cyclic-import
+from .managed import IBMJobManager  # pylint: disable=cyclic-import
+from .ibm_provider import IBMProvider
 from .backendjoblimit import BackendJobLimit
 from .exceptions import *
-from .ibmqbackendservice import IBMQBackendService
+from .ibm_backend_service import IBMBackendService
 from .utils.utils import setup_logger
 from .runner_result import RunnerResult
 from .version import __version__
@@ -101,15 +102,12 @@ from .version import __version__
 logger = logging.getLogger(__name__)
 setup_logger(logger)
 
-IBMQ = IBMQFactory()
-"""A global instance of an account manager that is used as the entry point for convenience."""
-
 # Constants used by the IBM Quantum logger.
-IBMQ_PROVIDER_LOGGER_NAME = 'qiskit_ibm'
+QISKIT_IBM_PROVIDER_LOGGER_NAME = 'qiskit_ibm'
 """The name of the IBM Quantum logger."""
-QISKIT_IBMQ_PROVIDER_LOG_LEVEL = 'QISKIT_IBMQ_PROVIDER_LOG_LEVEL'
+QISKIT_IBM_PROVIDER_LOG_LEVEL = 'QISKIT_IBM_PROVIDER_LOG_LEVEL'
 """The environment variable name that is used to set the level for the IBM Quantum logger."""
-QISKIT_IBMQ_PROVIDER_LOG_FILE = 'QISKIT_IBMQ_PROVIDER_LOG_FILE'
+QISKIT_IBM_PROVIDER_LOG_FILE = 'QISKIT_IBM_PROVIDER_LOG_FILE'
 """The environment variable name that is used to set the file for the IBM Quantum logger."""
 
 
@@ -134,13 +132,13 @@ def least_busy(
         The backend with the fewest number of pending jobs.
 
     Raises:
-        IBMQError: If the backends list is empty, or if none of the backends
+        IBMError: If the backends list is empty, or if none of the backends
             is available, or if a backend in the list
             does not have the ``pending_jobs`` attribute in its status.
     """
     if not backends:
-        raise IBMQError('Unable to find the least_busy '
-                        'backend from an empty list.') from None
+        raise IBMError('Unable to find the least_busy '
+                       'backend from an empty list.') from None
     try:
         candidates = []
         now = datetime.now()
@@ -148,7 +146,7 @@ def least_busy(
             backend_status = back.status()
             if not backend_status.operational or backend_status.status_msg != 'active':
                 continue
-            if reservation_lookahead and isinstance(back, IBMQBackend):
+            if reservation_lookahead and isinstance(back, IBMBackend):
                 end_time = now + timedelta(minutes=reservation_lookahead)
                 try:
                     if back.reservations(now, end_time):
@@ -158,8 +156,8 @@ def least_busy(
                                    "It will not be taken into consideration. %s", str(err))
             candidates.append(back)
         if not candidates:
-            raise IBMQError('No backend matches the criteria.')
+            raise IBMError('No backend matches the criteria.')
         return min(candidates, key=lambda b: b.status().pending_jobs)
     except AttributeError as ex:
-        raise IBMQError('A backend in the list does not have the `pending_jobs` '
-                        'attribute in its status.') from ex
+        raise IBMError('A backend in the list does not have the `pending_jobs` '
+                       'attribute in its status.') from ex

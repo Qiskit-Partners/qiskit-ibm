@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Decorators for using with IBMQProvider unit tests.
+"""Decorators for using with IBM Provider unit tests.
 
     Environment variables used by the decorators:
         * QISKIT_IBM_API_TOKEN: default API token to use.
@@ -33,11 +33,12 @@ from typing import Optional
 
 from qiskit.test.testing_options import get_test_options
 from qiskit_ibm import least_busy
-from qiskit_ibm.ibmqfactory import IBMQFactory
+from qiskit_ibm import IBMAccount
 from qiskit_ibm.credentials import (Credentials,
                                     discover_credentials)
-from qiskit_ibm.accountprovider import AccountProvider
-from qiskit_ibm import IBMQ
+from qiskit_ibm.ibm_provider import IBMProvider
+
+ACCOUNT = IBMAccount()
 
 
 def requires_qe_access(func):
@@ -90,14 +91,14 @@ def requires_providers(func):
     @wraps(func)
     @requires_qe_access
     def _wrapper(*args, **kwargs):
-        ibmq_factory = IBMQFactory()
+        account = IBMAccount()
         qe_token = kwargs.pop('qe_token')
         qe_url = kwargs.pop('qe_url')
 
         # Get the open access project public provider.
-        public_provider = ibmq_factory.enable_account(qe_token, qe_url)
+        public_provider = account.enable_account(qe_token, qe_url)
         # Get a premium provider.
-        premium_provider = _get_custom_provider(ibmq_factory)
+        premium_provider = _get_custom_provider(account)
 
         if premium_provider is None:
             raise SkipTest('Requires both the public provider and a premium provider.')
@@ -129,7 +130,7 @@ def requires_provider(func):
     @requires_qe_access
     def _wrapper(*args, **kwargs):
         _enable_account(kwargs.pop('qe_token'), kwargs.pop('qe_url'))
-        provider = _get_custom_provider(IBMQ) or list(IBMQ._providers.values())[0]
+        provider = _get_custom_provider(ACCOUNT) or list(ACCOUNT._providers.values())[0]
         kwargs.update({'provider': provider})
 
         return func(*args, **kwargs)
@@ -161,7 +162,7 @@ def requires_private_provider(func):
             raise SkipTest('Requires private provider.')
 
         hgp = hgp.split('/')
-        provider = IBMQ.get_provider(hub=hgp[0], group=hgp[1], project=hgp[2])
+        provider = ACCOUNT.get_provider(hub=hgp[0], group=hgp[1], project=hgp[2])
         kwargs.update({'provider': provider})
 
         return func(*args, **kwargs)
@@ -237,11 +238,11 @@ def _get_backend(qe_token, qe_url, backend_name):
     _enable_account(qe_token, qe_url)
 
     _backend = None
-    provider = _get_custom_provider(IBMQ) or list(IBMQ._providers.values())[0]
+    provider = _get_custom_provider(ACCOUNT) or list(ACCOUNT._providers.values())[0]
 
     if backend_name:
         # Put desired provider as the first in the list.
-        providers = [provider] + IBMQ.providers()
+        providers = [provider] + ACCOUNT.providers()
         for provider in providers:
             backends = provider.backends(name=backend_name)
             if backends:
@@ -293,11 +294,11 @@ def _get_credentials():
     raise Exception('Unable to locate valid credentials.')
 
 
-def _get_custom_provider(ibmq_factory: IBMQFactory) -> Optional[AccountProvider]:
+def _get_custom_provider(account: IBMAccount) -> Optional[IBMProvider]:
     """Find the provider for the specific hub/group/project, if any.
 
     Args:
-        ibmq_factory: IBMQFactory instance with account already loaded.
+        account: IBMAccount instance with account already loaded.
 
     Returns:
         Custom provider or ``None`` if default is to be used.
@@ -307,7 +308,7 @@ def _get_custom_provider(ibmq_factory: IBMQFactory) -> Optional[AccountProvider]
         else os.getenv('QISKIT_IBM_HGP', None)
     if hgp:
         hgp = hgp.split('/')
-        return ibmq_factory.get_provider(hub=hgp[0], group=hgp[1], project=hgp[2])
+        return account.get_provider(hub=hgp[0], group=hgp[1], project=hgp[2])
     return None  # No custom provider.
 
 
@@ -318,9 +319,9 @@ def _enable_account(qe_token: str, qe_url: str) -> None:
         qe_token: API token.
         qe_url: API URL.
     """
-    active_account = IBMQ.active_account()
+    active_account = ACCOUNT.active_account()
     if active_account:
         if active_account.get('token', '') == qe_token:
             return
-        IBMQ.disable_account()
-    IBMQ.enable_account(qe_token, qe_url)
+        ACCOUNT.disable_account()
+    ACCOUNT.enable_account(qe_token, qe_url)

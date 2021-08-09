@@ -39,12 +39,12 @@ Classes
 .. autosummary::
    :toctree: ../stubs/
 
-   IBMQRandomService
+   IBMRandomService
    CQCExtractor
    CQCExtractorJob
 
 """
 
-from .ibmqrandomservice import IBMQRandomService
+from .ibm_random_service import IBMRandomService
 from .cqcextractor import CQCExtractor
 from .cqcextractorjob import CQCExtractorJob
