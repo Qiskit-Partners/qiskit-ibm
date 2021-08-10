@@ -27,7 +27,7 @@ def mock_get_backend(backend):
     value to qiskit_ibm.IBMAccount after you finish using your mock.
     Args:
         backend (str): The class name as a string for the fake device to
-            return from the mock IBMQ object. For example, FakeVigo.
+            return from the mock IBMQ object. For example, FakeManila.
     Raises:
         NameError: If the specified value of backend
     """

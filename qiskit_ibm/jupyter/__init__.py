@@ -34,7 +34,7 @@ Detailed information on a single backend
     :hide-output:
 
     from qiskit_ibm.test.ibm_account_mock import mock_get_backend
-    mock_get_backend('FakeVigo')
+    mock_get_backend('FakeManila')
 
 .. jupyter-execute::
 
