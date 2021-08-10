@@ -24,7 +24,7 @@ from qiskit.test.reference_circuits import ReferenceCircuits
 from qiskit.pulse import Schedule
 from qiskit.providers.exceptions import JobError
 from qiskit.providers.jobstatus import JobStatus
-from qiskit_ibm.account import IBMAccount
+from qiskit_ibm.ibm_account import IBMAccount
 from qiskit_ibm.ibm_provider import IBMProvider
 from qiskit_ibm.ibm_backend import IBMBackend
 from qiskit_ibm.job import IBMJob
