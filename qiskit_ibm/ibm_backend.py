@@ -72,7 +72,7 @@ class IBMBackend(Backend):
 
         account = IBMAccount()
         provider = account.load_account()
-        backend = provider.backend.ibmq_vigo
+        backend = provider.backend.ibmq_manila
         qx = random_circuit(n_qubits=5, depth=4)
         transpiled = transpile(qx, backend=backend)
         job = backend.run(transpiled)

@@ -76,7 +76,7 @@ def iplot_gate_map(
            account.load_account()
 
            provider = account.get_provider(group='open', project='main')
-           backend = provider.get_backend('ibmq_vigo')
+           backend = provider.get_backend('ibmq_manila')
 
            iplot_gate_map(backend, as_widget=True)
     """

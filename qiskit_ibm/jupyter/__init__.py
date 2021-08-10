@@ -44,7 +44,7 @@ Detailed information on a single backend
     account = IBMAccount()
     account.load_account()
     provider = account.get_provider(hub='ibm-q')
-    backend = provider.get_backend('ibmq_vigo')
+    backend = provider.get_backend('ibmq_manila')
 
 .. jupyter-execute::
     :hide-code:

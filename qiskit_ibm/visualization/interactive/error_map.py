@@ -73,7 +73,7 @@ def iplot_error_map(
            account.load_account()
 
            provider = account.get_provider(group='open', project='main')
-           backend = provider.get_backend('ibmq_vigo')
+           backend = provider.get_backend('ibmq_manila')
 
            iplot_error_map(backend, as_widget=True)
     """
