@@ -34,7 +34,7 @@ Detailed information on a single backend
     :hide-output:
 
     from qiskit_ibm.test.ibm_account_mock import mock_get_backend
-    mock_get_backend('FakeManila')
+    mock_get_backend('FakeVigo')
 
 .. jupyter-execute::
 
@@ -44,7 +44,7 @@ Detailed information on a single backend
     account = IBMAccount()
     account.load_account()
     provider = account.get_provider(hub='ibm-q')
-    backend = provider.get_backend('ibmq_manila')
+    backend = provider.get_backend('ibmq_vigo')
 
 .. jupyter-execute::
     :hide-code:

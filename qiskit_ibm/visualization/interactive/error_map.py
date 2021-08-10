@@ -61,7 +61,7 @@ def iplot_error_map(
             :hide-output:
 
             from qiskit.test.ibmq_mock import mock_get_backend
-            mock_get_backend('FakeManila')
+            mock_get_backend('FakeVigo')
 
 
         .. jupyter-execute::
@@ -73,7 +73,7 @@ def iplot_error_map(
            account.load_account()
 
            provider = account.get_provider(group='open', project='main')
-           backend = provider.get_backend('ibmq_manila')
+           backend = provider.get_backend('ibmq_vigo')
 
            iplot_error_map(backend, as_widget=True)
     """
