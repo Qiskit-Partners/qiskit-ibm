@@ -60,19 +60,22 @@ def iplot_gate_map(
     Example:
 
         .. jupyter-execute::
-            :hide-code:
-            :hide-output:
-
-            from qiskit.test.ibmq_mock import mock_get_backend
-            mock_get_backend('FakeVigo')
-
-
-        .. jupyter-execute::
 
            from qiskit_ibm import IBMAccount
            from qiskit_ibm.visualization import iplot_gate_map
 
            account = IBMAccount()
+
+
+        .. jupyter-execute::
+            :hide-code:
+            :hide-output:
+
+            from qiskit_ibm.test.ibm_account_mock import get_mock_ibm_account
+            account = get_mock_ibm_account('FakeVigo')
+
+        .. jupyter-execute::
+
            account.load_account()
 
            provider = account.get_provider(group='open', project='main')
