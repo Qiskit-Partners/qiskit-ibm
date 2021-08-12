@@ -24,8 +24,9 @@ from qiskit_ibm.exceptions import (IBMAccountError, IBMAccountValueError,
                                    IBMAccountCredentialsInvalidUrl,
                                    IBMAccountCredentialsInvalidToken)
 from qiskit_ibm import ibm_account
-from qiskit_ibm.ibm_account import IBMAccount, QX_AUTH_URL
+from qiskit_ibm.ibm_account import IBMAccount
 from qiskit_ibm.credentials.hubgroupproject import HubGroupProject
+from qiskit_ibm.apiconstants import QISKIT_IBM_API_URL
 
 from ..ibm_test_case import IBMTestCase
 from ..decorators import requires_qe_access
@@ -193,7 +194,7 @@ class TestIBMAccountAccounts(IBMTestCase):
     @requires_qe_access
     def test_load_account(self, qe_token, qe_url):
         """Test loading an account."""
-        if qe_url != QX_AUTH_URL:
+        if qe_url != QISKIT_IBM_API_URL:
             # .save_account() expects an auth production URL.
             self.skipTest('Test requires production auth URL')
 
@@ -207,7 +208,7 @@ class TestIBMAccountAccounts(IBMTestCase):
     @requires_qe_access
     def test_load_account_saved_provider(self, qe_token, qe_url):
         """Test loading an account that contains a saved provider."""
-        if qe_url != QX_AUTH_URL:
+        if qe_url != QISKIT_IBM_API_URL:
             # .save_account() expects an auth production URL.
             self.skipTest('Test requires production auth URL')
 
@@ -234,7 +235,7 @@ class TestIBMAccountAccounts(IBMTestCase):
     @requires_qe_access
     def test_load_account_saved_provider_invalid_hgp(self, qe_token, qe_url):
         """Test loading an account that contains a saved provider that does not exist."""
-        if qe_url != QX_AUTH_URL:
+        if qe_url != QISKIT_IBM_API_URL:
             # .save_account() expects an auth production URL.
             self.skipTest('Test requires production auth URL')
 

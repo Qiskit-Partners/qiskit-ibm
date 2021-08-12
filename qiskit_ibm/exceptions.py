@@ -49,13 +49,13 @@ class IBMAccountCredentialsInvalidUrl(IBMAccountError):
     pass
 
 
-class IBMAccountMultipleCredentialsFound(IBMAccountError):
-    """Errors raised when multiple credentials are found."""
+class IBMProviderError(IBMAccountError):
+    """Errors related to provider handling."""
     pass
 
 
-class IBMProviderError(IBMAccountError):
-    """Errors related to provider handling."""
+class IBMProviderValueError(IBMProviderError):
+    """Value errors raised by IBM provider."""
     pass
 
 

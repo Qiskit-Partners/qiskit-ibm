@@ -17,6 +17,7 @@ from typing import Dict, List, Optional, Any, Callable, Union
 from collections import OrderedDict
 import traceback
 import copy
+import os
 
 from qiskit.providers import ProviderV1 as Provider  # type: ignore[attr-defined]
 from qiskit.providers.models import (QasmBackendConfiguration,
@@ -29,15 +30,19 @@ from qiskit.transpiler import Layout
 from qiskit_ibm.runtime import runtime_job  # pylint: disable=unused-import
 from qiskit_ibm import ibm_account  # pylint: disable=unused-import,cyclic-import
 
-from .api.clients import AccountClient
+from .api.clients import AuthClient, AccountClient, VersionClient
+from .apiconstants import QISKIT_IBM_API_URL
 from .ibm_backend import IBMBackend, IBMSimulator  # pylint: disable=cyclic-import
-from .credentials import Credentials
-from .ibm_backend_service import IBMBackendService,  # pylint: disable=cyclic-import
+from .credentials import Credentials, discover_credentials
+from .credentials.exceptions import HubGroupProjectInvalidStateError
+from .ibm_backend_service import IBMBackendService  # pylint: disable=cyclic-import
 from .utils.json_decoder import decode_backend_configuration
 from .random.ibm_random_service import IBMRandomService  # pylint: disable=cyclic-import
 from .experiment import IBMExperimentService  # pylint: disable=cyclic-import
 from .runtime.ibm_runtime_service import IBMRuntimeService  # pylint: disable=cyclic-import
-from .exceptions import IBMNotAuthorizedError, IBMInputValueError
+from .exceptions import (IBMNotAuthorizedError, IBMInputValueError, IBMAccountCredentialsNotFound,
+                         IBMAccountCredentialsInvalidFormat, IBMAccountCredentialsInvalidToken,
+                         IBMAccountCredentialsInvalidUrl, IBMProviderValueError)
 from .runner_result import RunnerResult  # pylint: disable=cyclic-import
 
 logger = logging.getLogger(__name__)
@@ -100,14 +105,133 @@ class IBMProvider(Provider):
         in Jupyter Notebook and the Python interpreter.
     """
 
-    def __init__(self, credentials: Credentials, account: 'ibm_account.IBMAccount') -> None:
+    def __init__(
+            self,
+            token: Optional[str] = None,
+            url: Optional[str] = None,
+            hub: Optional[str] = None,
+            group: Optional[str] = None,
+            project: Optional[str] = None,
+            account: Optional['ibm_account.IBMAccount'] = None,
+            **kwargs: Any
+    ) -> None:
         """IBMProvider constructor.
 
         Args:
-            credentials: IBM Quantum Experience credentials.
+            token: IBM Quantum Experience token.
+            url: URL for the IBM Quantum Experience authentication server.
+            hub: Name of the hub to use.
+            group: Name of the group to use.
+            project: Name of the project to use.
             account: IBM Quantum account.
+            **kwargs: Additional settings for the connection:
+
+                * proxies (dict): proxy configuration.
+                * verify (bool): verify the server's TLS certificate.
+
+        Raises:
+            IBMAccountCredentialsInvalidFormat: If the default provider stored on
+                disk could not be parsed.
+            IBMAccountCredentialsNotFound: If no IBM Quantum credentials
+                can be found.
+            IBMAccountCredentialsInvalidUrl: If the URL specified is not
+                a valid IBM Quantum authentication URL.
+            IBMAccountCredentialsInvalidToken: If the `token` is not a valid
+                IBM Quantum token.
+            IBMProviderValueError: If only one or two parameters from `hub`, `group`,
+                `project` are specified.
         """
         super().__init__()
+
+        stored_hub = None
+        stored_group = None
+        stored_project = None
+
+        if account is None:
+            if token:
+                if not isinstance(token, str):
+                    raise IBMAccountCredentialsInvalidToken(
+                        'Invalid IBM Quantum token '
+                        'found: "{}" of type {}.'.format(token, type(token)))
+                url = url or os.getenv('QISKIT_IBM_API_URL') or QISKIT_IBM_API_URL
+                account_credentials = Credentials(token=token, url=url, **kwargs)
+                preferences = {}  # type: Optional[Dict]
+            else:
+                # Check for valid credentials.
+                try:
+                    stored_credentials, preferences = discover_credentials()
+                except HubGroupProjectInvalidStateError as ex:
+                    raise IBMAccountCredentialsInvalidFormat(
+                        'Invalid provider (hub/group/project) data found {}'
+                        .format(str(ex))) from ex
+
+                credentials_list = list(stored_credentials.values())
+
+                if not credentials_list:
+                    raise IBMAccountCredentialsNotFound(
+                        'No IBM Quantum Experience credentials found.')
+
+                account_credentials = credentials_list[0]
+
+                if account_credentials.default_provider:
+                    stored_hub, stored_group, stored_project = \
+                        account_credentials.default_provider.to_tuple()
+                else:
+                    stored_hub = account_credentials.hub
+                    stored_group = account_credentials.group
+                    stored_project = account_credentials.project
+
+            version_info = self._check_api_version(account_credentials)
+
+            # Check the URL is a valid authentication URL.
+            if not version_info['new_api'] or 'api-auth' not in version_info:
+                raise IBMAccountCredentialsInvalidUrl(
+                    'The URL specified ({}) is not an IBM Quantum authentication URL. '
+                    'Valid authentication URL: {}.'
+                    .format(account_credentials.url, QISKIT_IBM_API_URL))
+
+            auth_client = AuthClient(account_credentials.token,
+                                     account_credentials.base_url,
+                                     **account_credentials.connection_parameters())
+            service_urls = auth_client.current_service_urls()
+        else:
+            account_credentials = account._credentials
+            auth_client = account._auth_client
+            service_urls = account._service_urls
+            preferences = account._preferences
+
+        # If any `hub`, `group`, or `project` is specified, make sure all are set.
+        if any([hub, group, project]) and not all([hub, group, project]):
+            raise IBMProviderValueError('The hub, group, and project parameters '
+                                        'must all be specified. '
+                                        'hub = "{}", group = "{}", project = "{}"'
+                                        .format(hub, group, project))
+
+        if not all([hub, group, project]):
+            hub = stored_hub
+            group = stored_group
+            project = stored_project
+
+        if not all([hub, group, project]):
+            hub = 'ibm-q'
+            group = 'open'
+            project = 'main'
+
+        credentials = Credentials(
+            account_credentials.token,
+            access_token=auth_client.current_access_token(),
+            url=service_urls['http'],
+            websockets_url=service_urls['ws'],
+            proxies=account_credentials.proxies,
+            verify=account_credentials.verify,
+            services=service_urls.get('services', {}),
+            default_provider=account_credentials.default_provider,
+            hub=hub,
+            group=group,
+            project=project
+        )
+        credentials.preferences = \
+            preferences.get(credentials.unique_id(), {})
 
         self.credentials = credentials
         self._account = account
@@ -442,3 +566,14 @@ class IBMProvider(Provider):
 
         return "<{} for IBMAccount({})>".format(
             self.__class__.__name__, credentials_info)
+
+    @staticmethod
+    def _check_api_version(credentials: Credentials) -> Dict[str, Union[bool, str]]:
+        """Check the version of the remote server in a set of credentials.
+
+        Returns:
+            A dictionary with version information.
+        """
+        version_finder = VersionClient(credentials.base_url,
+                                       **credentials.connection_parameters())
+        return version_finder.version()

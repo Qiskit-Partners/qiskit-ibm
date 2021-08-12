@@ -59,7 +59,7 @@ def discover_credentials(
     This method looks for credentials in the following places in order and
     returns the first ones found:
 
-        1. The the environment variables.
+        1. The environment variables.
         2. The ``qiskitrc`` configuration file
 
     Args:

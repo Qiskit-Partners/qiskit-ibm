@@ -72,7 +72,6 @@ Exceptions
     IBMAccountCredentialsInvalidFormat
     IBMAccountCredentialsInvalidToken
     IBMAccountCredentialsInvalidUrl
-    IBMAccountMultipleCredentialsFound
     IBMBackendError
     IBMBackendApiError
     IBMBackendApiProtocolError

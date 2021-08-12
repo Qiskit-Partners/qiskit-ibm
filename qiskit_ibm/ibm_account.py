@@ -17,8 +17,8 @@ from typing import Dict, List, Union, Callable, Optional, Any
 from collections import OrderedDict
 import traceback
 
-from .ibm_provider import IBMProvider
 from .api.clients import AuthClient, VersionClient
+from .apiconstants import QISKIT_IBM_API_URL
 from .credentials import Credentials, discover_credentials
 from .credentials.hubgroupproject import HubGroupProject
 from .credentials.configrc import (read_credentials_from_qiskitrc,
@@ -27,15 +27,10 @@ from .credentials.configrc import (read_credentials_from_qiskitrc,
 from .credentials.exceptions import HubGroupProjectInvalidStateError
 from .exceptions import (IBMAccountError, IBMAccountValueError, IBMProviderError,
                          IBMAccountCredentialsInvalidFormat, IBMAccountCredentialsNotFound,
-                         IBMAccountCredentialsInvalidUrl, IBMAccountCredentialsInvalidToken,
-                         IBMAccountMultipleCredentialsFound)
+                         IBMAccountCredentialsInvalidUrl, IBMAccountCredentialsInvalidToken)
+from .ibm_provider import IBMProvider
 
 logger = logging.getLogger(__name__)
-
-QX_AUTH_URL = 'https://auth.quantum-computing.ibm.com/api'
-UPDATE_ACCOUNT_TEXT = "Please update your accounts and programs by following the " \
-                      "instructions here: https://github.com/Qiskit/qiskit-ibmq-provider#" \
-                      "updating-to-the-new-ibm-q-experience "
 
 
 class IBMAccount:
@@ -45,13 +40,17 @@ class IBMAccount:
         """IBMAccount constructor."""
         self._credentials = None  # type: Optional[Credentials]
         self._providers = OrderedDict()  # type: Dict[HubGroupProject, IBMProvider]
+        self._auth_client = None  # type: AuthClient
+        self._service_urls = None  # type: Dict[str, str]
+        self._user_hubs = None  # type: List[Dict[str, str]]
+        self._preferences = None  # type: Optional[Dict]
 
     # Account management functions.
 
     def enable_account(
             self,
             token: str,
-            url: str = QX_AUTH_URL,
+            url: str = QISKIT_IBM_API_URL,
             hub: Optional[str] = None,
             group: Optional[str] = None,
             project: Optional[str] = None,
@@ -94,8 +93,8 @@ class IBMAccount:
         # Check the URL is a valid authentication URL.
         if not version_info['new_api'] or 'api-auth' not in version_info:
             raise IBMAccountCredentialsInvalidUrl(
-                'The URL specified ({}) is not an IBM Quantum Experience authentication '
-                'URL. Valid authentication URL: {}.'.format(credentials.url, QX_AUTH_URL))
+                'The URL specified ({}) is not an IBM Quantum authentication URL. '
+                'Valid authentication URL: {}.'.format(credentials.url, QISKIT_IBM_API_URL))
 
         # Initialize the providers.
         self._initialize_providers(credentials)
@@ -141,8 +140,6 @@ class IBMAccount:
                 disk could not be parsed.
             IBMAccountCredentialsNotFound: If no IBM Quantum Experience credentials
                 can be found.
-            IBMAccountMultipleCredentialsFound: If multiple IBM Quantum Experience
-                credentials are found.
             IBMAccountCredentialsInvalidUrl: If invalid IBM Quantum Experience
                 credentials are found.
             IBMProviderError: If the default provider stored on disk could not
@@ -161,10 +158,6 @@ class IBMAccount:
             raise IBMAccountCredentialsNotFound(
                 'No IBM Quantum Experience credentials found.')
 
-        if len(credentials_list) > 1:
-            raise IBMAccountMultipleCredentialsFound(
-                'Multiple IBM Quantum Experience credentials found. ' + UPDATE_ACCOUNT_TEXT)
-
         credentials = credentials_list[0]
         # Explicitly check via a server call, to allow environment auth URLs
         # contain IBM Quantum Experience v2 URL (but not auth) slipping through.
@@ -173,7 +166,7 @@ class IBMAccount:
         # Check the URL is a valid authentication URL.
         if not version_info['new_api'] or 'api-auth' not in version_info:
             raise IBMAccountCredentialsInvalidUrl(
-                'Invalid IBM Quantum Experience credentials found. ' + UPDATE_ACCOUNT_TEXT)
+                'Invalid IBM Quantum credentials found.')
 
         # Initialize the providers.
         if self._credentials:
@@ -211,7 +204,7 @@ class IBMAccount:
     @staticmethod
     def save_account(
             token: str,
-            url: str = QX_AUTH_URL,
+            url: str = QISKIT_IBM_API_URL,
             hub: Optional[str] = None,
             group: Optional[str] = None,
             project: Optional[str] = None,
@@ -243,13 +236,13 @@ class IBMAccount:
             IBMAccountValueError: If only one or two parameters from `hub`, `group`,
                 `project` are specified.
         """
-        if url != QX_AUTH_URL:
+        if url != QISKIT_IBM_API_URL:
             raise IBMAccountCredentialsInvalidUrl(
-                'Invalid IBM Q Experience credentials found. ' + UPDATE_ACCOUNT_TEXT)
+                'Invalid IBM Quantum credentials found.')
 
         if not token or not isinstance(token, str):
             raise IBMAccountCredentialsInvalidToken(
-                'Invalid IBM Quantum Experience token '
+                'Invalid IBM Quantum token '
                 'found: "{}" of type {}.'.format(token, type(token)))
 
         # If any `hub`, `group`, or `project` is specified, make sure all parameters are set.
@@ -276,25 +269,19 @@ class IBMAccount:
         Raises:
             IBMAccountCredentialsNotFound: If no valid IBM Quantum Experience
                 credentials can be found on disk.
-            IBMAccountMultipleCredentialsFound: If multiple IBM Quantum Experience
-                credentials are found on disk.
             IBMAccountCredentialsInvalidUrl: If invalid IBM Quantum Experience
                 credentials are found on disk.
         """
         stored_credentials, _ = read_credentials_from_qiskitrc()
         if not stored_credentials:
             raise IBMAccountCredentialsNotFound(
-                'No IBM Quantum Experience credentials found on disk.')
-
-        if len(stored_credentials) != 1:
-            raise IBMAccountMultipleCredentialsFound(
-                'Multiple IBM Quantum Experience credentials found on disk. ' + UPDATE_ACCOUNT_TEXT)
+                'No IBM Quantum credentials found on disk.')
 
         credentials = list(stored_credentials.values())[0]
 
-        if credentials.url != QX_AUTH_URL:
+        if credentials.url != QISKIT_IBM_API_URL:
             raise IBMAccountCredentialsInvalidUrl(
-                'Invalid IBM Quantum Experience credentials found on disk. ' + UPDATE_ACCOUNT_TEXT)
+                'Invalid IBM Quantum credentials found on disk. ')
 
         remove_credentials(credentials)
 
@@ -306,8 +293,6 @@ class IBMAccount:
             A dictionary with information about the account stored on disk.
 
         Raises:
-            IBMAccountMultipleCredentialsFound: If multiple IBM Quantum Experience
-                credentials are found on disk.
             IBMAccountCredentialsInvalidUrl: If invalid IBM Quantum Experience
                 credentials are found on disk.
         """
@@ -315,15 +300,11 @@ class IBMAccount:
         if not stored_credentials:
             return {}
 
-        if len(stored_credentials) > 1:
-            raise IBMAccountMultipleCredentialsFound(
-                'Multiple IBM Quantum Experience credentials found on disk. ' + UPDATE_ACCOUNT_TEXT)
-
         credentials = list(stored_credentials.values())[0]
 
-        if credentials.url != QX_AUTH_URL:
+        if credentials.url != QISKIT_IBM_API_URL:
             raise IBMAccountCredentialsInvalidUrl(
-                'Invalid IBM Quantum Experience credentials found on disk. ' + UPDATE_ACCOUNT_TEXT)
+                'Invalid IBM Quantum credentials found on disk.')
 
         return {
             'token': credentials.token,
@@ -434,33 +415,19 @@ class IBMAccount:
             credentials: Credentials for IBM Quantum.
             preferences: Account preferences.
         """
-        auth_client = AuthClient(credentials.token,
-                                 credentials.base_url,
-                                 **credentials.connection_parameters())
-        service_urls = auth_client.current_service_urls()
-        user_hubs = auth_client.user_hubs()
-        preferences = preferences or {}
+        self._auth_client = AuthClient(credentials.token,
+                                       credentials.base_url,
+                                       **credentials.connection_parameters())
+        self._service_urls = self._auth_client.current_service_urls()
+        self._user_hubs = self._auth_client.user_hubs()
+        self._preferences = preferences or {}
 
         self._credentials = credentials
-        for hub_info in user_hubs:
-            # Build credentials.
-            provider_credentials = Credentials(
-                credentials.token,
-                access_token=auth_client.current_access_token(),
-                url=service_urls['http'],
-                websockets_url=service_urls['ws'],
-                proxies=credentials.proxies,
-                verify=credentials.verify,
-                services=service_urls.get('services', {}),
-                default_provider=credentials.default_provider,
-                **hub_info, )
-            provider_credentials.preferences = \
-                preferences.get(provider_credentials.unique_id(), {})
-
+        for hub_info in self._user_hubs:
             # Build the provider.
             try:
-                provider = IBMProvider(provider_credentials, self)
-                self._providers[provider_credentials.unique_id()] = provider
+                provider = IBMProvider(token=credentials.token, **hub_info, account=self)
+                self._providers[provider.credentials.unique_id()] = provider
             except Exception:  # pylint: disable=broad-except
                 # Catch-all for errors instantiating the provider.
                 logger.warning('Unable to instantiate provider for %s: %s',
