@@ -27,6 +27,6 @@ The dashboard can be instantiated using
     account = IBMAccount()
     account.load_account()
 
-    %iqx_dashboard
+    %ibm_quantum_dashboard
 
 """

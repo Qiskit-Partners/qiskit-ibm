@@ -89,7 +89,7 @@ class TestBackendInfo(IBMTestCase):
                 jobs_tab(backend)
 
 
-class TestIQXDashboard(IBMTestCase):
+class TestIBMDashboard(IBMTestCase):
     """Test backend information Jupyter widget."""
 
     @classmethod

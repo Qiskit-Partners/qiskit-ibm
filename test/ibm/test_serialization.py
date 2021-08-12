@@ -23,7 +23,7 @@ from qiskit.circuit import Parameter
 from qiskit.version import VERSION as terra_version
 
 from qiskit_ibm import least_busy
-from qiskit_ibm.utils.json_encoder import IQXJsonEncoder
+from qiskit_ibm.utils.json_encoder import IBMJsonEncoder
 
 from ..decorators import requires_provider
 from ..utils import cancel_job
@@ -170,9 +170,9 @@ class TestSerialization(IBMTestCase):
     def test_convert_complex(self):
         """Verify that real and complex ParameterExpressions are supported."""
         param = Parameter('test')
-        self.assertEqual(IQXJsonEncoder().default(param.bind({param: 0.2})), 0.2)
+        self.assertEqual(IBMJsonEncoder().default(param.bind({param: 0.2})), 0.2)
 
-        val = IQXJsonEncoder().default(param.bind({param: 0.2+0.1j}))
+        val = IBMJsonEncoder().default(param.bind({param: 0.2+0.1j}))
         self.assertEqual(val[0], 0.2)
         self.assertEqual(val[1], 0.1)
 

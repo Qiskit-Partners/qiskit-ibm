@@ -73,14 +73,14 @@ def _add_device_to_list(backend: BackendWithProviders,
     device_list.children = list(device_list.children) + [device_pane]
 
 
-class IQXDashboard(Subscriber):
+class IBMDashboard(Subscriber):
     """An IBM Quantum dashboard.
 
     This dashboard shows both device and job information.
     """
 
     def __init__(self):
-        """IQXDashboard constructor."""
+        """IBM Quantum Dashboard constructor."""
         super().__init__()
 
         # A list of job widgets. Each represents a job and has 5 children:
@@ -301,7 +301,7 @@ def build_dashboard_widget() -> AccordionWithThread:
 
     acc._device_list = acc.children[0].children[0].children[0]
 
-    acc.set_title(0, 'IQX Dashboard')
+    acc.set_title(0, 'IBM Quantum Dashboard')
     acc.selected_index = None
     acc.layout.visibility = 'hidden'
     display(acc)
@@ -322,11 +322,11 @@ def build_dashboard_widget() -> AccordionWithThread:
 
 
 @magics_class
-class IQXDashboardMagic(Magics):
+class IBMDashboardMagic(Magics):
     """A class for enabling/disabling the IBM Quantum dashboard."""
 
     @line_magic
-    def iqx_dashboard(self, line='', cell=None) -> None:
+    def ibm_quantum_dashboard(self, line='', cell=None) -> None:
         """A Jupyter magic function to enable the dashboard."""
         # pylint: disable=unused-argument
         account = IBMAccount()
@@ -342,15 +342,15 @@ class IQXDashboardMagic(Magics):
                 if not pro:
                     raise QiskitError(
                         "No providers found. Must load your IBM Quantum account.")
-        _IQX_DASHBOARD.stop_dashboard()
-        _IQX_DASHBOARD.start_dashboard()
+        _IBM_DASHBOARD.stop_dashboard()
+        _IBM_DASHBOARD.start_dashboard()
 
     @line_magic
-    def disable_iqx_dashboard(self, line='', cell=None) -> None:
+    def disable_ibm_quantum_dashboard(self, line='', cell=None) -> None:
         """A Jupyter magic function to disable the dashboard."""
         # pylint: disable=unused-argument
-        _IQX_DASHBOARD.stop_dashboard()
+        _IBM_DASHBOARD.stop_dashboard()
 
 
-_IQX_DASHBOARD = IQXDashboard()
+_IBM_DASHBOARD = IBMDashboard()
 """The Jupyter IBM Quantum dashboard instance."""

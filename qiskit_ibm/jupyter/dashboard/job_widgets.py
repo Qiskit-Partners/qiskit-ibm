@@ -20,7 +20,7 @@ import ipywidgets as widgets
 from qiskit_ibm.job.ibm_job import IBMJob
 
 
-def make_clear_button(watcher: 'IQXDashboard') -> widgets.GridBox:
+def make_clear_button(watcher: 'IBMDashboard') -> widgets.GridBox:
     """Makes the clear button.
 
     Args:
@@ -73,7 +73,7 @@ def make_labels() -> widgets.HBox:
     return labels
 
 
-def create_job_widget(watcher: 'IQXDashboard',
+def create_job_widget(watcher: 'IBMDashboard',
                       job: IBMJob,
                       backend: str,
                       status: str = '',
