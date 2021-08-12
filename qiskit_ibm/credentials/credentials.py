@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Represent IBM Quantum Experience account credentials."""
+"""Represent IBM Quantum account credentials."""
 
 import re
 
@@ -24,14 +24,14 @@ REGEX_IBM_HUBS = (
     '(?P<prefix>http[s]://.+/api)'
     '/Hubs/(?P<hub>[^/]+)/Groups/(?P<group>[^/]+)/Projects/(?P<project>[^/]+)'
 )
-"""str: Regex that matches an IBM Quantum Experience URL with hub information."""
+"""str: Regex that matches an IBM Quantum URL with hub information."""
 
 TEMPLATE_IBM_HUBS = '{prefix}/Network/{hub}/Groups/{group}/Projects/{project}'
-"""str: Template for creating an IBM Quantum Experience URL with hub/group/project information."""
+"""str: Template for creating an IBM Quantum URL with hub/group/project information."""
 
 
 class Credentials:
-    """IBM Quantum Experience account credentials and preferences.
+    """IBM Quantum account credentials and preferences.
 
     Note:
         By convention, two credentials that have the same hub, group,
@@ -56,8 +56,8 @@ class Credentials:
         """Credentials constructor.
 
         Args:
-            token: IBM Quantum Experience API token.
-            url: IBM Quantum Experience URL.
+            token: IBM Quantum API token.
+            url: IBM Quantum URL.
             websockets_url: URL for websocket server.
             hub: The hub to use.
             group: The group to use.
@@ -141,7 +141,7 @@ def _unify_ibm_quantum_url(
     """Return a new-style set of credential values (url and hub parameters).
 
     Args:
-        url: URL for IBM Quantum Experience.
+        url: URL for IBM Quantum.
         hub: The hub to use.
         group: The group to use.
         project: The project to use.
@@ -150,7 +150,7 @@ def _unify_ibm_quantum_url(
         A tuple that consists of ``url``, ``base_url``, ``hub``, ``group``,
         and ``project``, where
 
-            * url: The new-style IBM Quantum Experience URL that contains
+            * url: The new-style IBM Quantum URL that contains
               the hub, group, and project names.
             * base_url: Base URL that does not contain the hub, group, and
               project names.

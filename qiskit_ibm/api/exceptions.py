@@ -10,13 +10,13 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Exceptions related to the IBM Quantum Experience API."""
+"""Exceptions related to the IBM Quantum API."""
 
 from ..exceptions import IBMError
 
 
 class ApiError(IBMError):
-    """Generic IBM Quantum Experience API error."""
+    """Generic IBM Quantum API error."""
     pass
 
 

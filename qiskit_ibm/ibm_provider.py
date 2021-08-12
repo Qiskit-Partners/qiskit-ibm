@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Provider for a single IBM Quantum Experience account."""
+"""Provider for a single IBM Quantum account."""
 
 import logging
 from typing import Dict, List, Optional, Any, Callable, Union
@@ -49,9 +49,9 @@ logger = logging.getLogger(__name__)
 
 
 class IBMProvider(Provider):
-    """Provider for a single IBM Quantum Experience account.
+    """Provider for a single IBM Quantum account.
 
-    The account provider class provides access to the IBM Quantum Experience
+    The account provider class provides access to the IBM Quantum
     services available to this account.
 
     You can access a provider by enabling an account with the
@@ -60,7 +60,7 @@ class IBMProvider(Provider):
 
         from qiskit_ibm import IBMAccount
         account = IBMAccount()
-        provider = account.enable_account(<INSERT_IBM_QUANTUM_EXPERIENCE_TOKEN>)
+        provider = account.enable_account(<INSERT_IBM_QUANTUM_TOKEN>)
 
     To select a different provider, use the
     :meth:`IBMAccount.get_provider()<IBMAccount.get_provider>` method and specify the hub,
@@ -68,7 +68,7 @@ class IBMProvider(Provider):
 
     Each provider may offer different services. The main service,
     :class:`~qiskit_ibm.ibm_backend_service.IBMBackendService`, is
-    available to all providers and gives access to IBM Quantum Experience
+    available to all providers and gives access to IBM Quantum
     devices and simulators.
 
     You can obtain an instance of a service using the :meth:`service()` method
@@ -118,8 +118,8 @@ class IBMProvider(Provider):
         """IBMProvider constructor.
 
         Args:
-            token: IBM Quantum Experience token.
-            url: URL for the IBM Quantum Experience authentication server.
+            token: IBM Quantum token.
+            url: URL for the IBM Quantum authentication server.
             hub: Name of the hub to use.
             group: Name of the group to use.
             project: Name of the project to use.
@@ -169,7 +169,7 @@ class IBMProvider(Provider):
 
                 if not credentials_list:
                     raise IBMAccountCredentialsNotFound(
-                        'No IBM Quantum Experience credentials found.')
+                        'No IBM Quantum credentials found.')
 
                 account_credentials = credentials_list[0]
 

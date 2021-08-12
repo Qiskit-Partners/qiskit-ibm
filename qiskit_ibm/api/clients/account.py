@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Client for accessing an individual IBM Quantum Experience account."""
+"""Client for accessing an individual IBM Quantum account."""
 
 import logging
 import time
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 class AccountClient(BaseClient):
-    """Client for accessing an individual IBM Quantum Experience account."""
+    """Client for accessing an individual IBM Quantum account."""
 
     def __init__(
             self,

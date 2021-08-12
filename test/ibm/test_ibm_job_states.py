@@ -416,7 +416,7 @@ def _auto_progress_api(api, interval=0.2):
 
 
 class BaseFakeAPI:
-    """Base class for faking the IBM Quantum Experience API."""
+    """Base class for faking the IBM Quantum API."""
 
     class NoMoreStatesError(Exception):
         """Raised when it is not possible to progress more."""

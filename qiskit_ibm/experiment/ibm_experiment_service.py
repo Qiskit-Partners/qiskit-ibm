@@ -89,7 +89,7 @@ class IBMExperimentService:
         """IBMExperimentService constructor.
 
         Args:
-            provider: IBM Quantum Experience account provider.
+            provider: IBM Quantum account provider.
         """
         super().__init__()
 

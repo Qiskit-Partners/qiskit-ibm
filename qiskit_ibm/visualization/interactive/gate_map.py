@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Interactive gate map for IBM Quantum Experience devices."""
+"""Interactive gate map for IBM Quantum devices."""
 
 from typing import Tuple, Union, Optional, List
 

@@ -17,7 +17,7 @@ Random Number Services (:mod:`qiskit_ibm.random`)
 
 .. currentmodule:: qiskit_ibm.random
 
-Modules related to IBM Quantum Experience random number generator services.
+Modules related to IBM Quantum random number generator services.
 
 .. caution::
 

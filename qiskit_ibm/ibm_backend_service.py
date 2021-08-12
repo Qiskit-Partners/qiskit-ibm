@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Backend namespace for an IBM Quantum Experience account provider."""
+"""Backend namespace for an IBM Quantum account provider."""
 
 import logging
 import warnings
@@ -38,10 +38,10 @@ logger = logging.getLogger(__name__)
 
 
 class IBMBackendService:
-    """Backend namespace for an IBM Quantum Experience account provider.
+    """Backend namespace for an IBM Quantum account provider.
 
     Represent a namespace that provides backend related services for the IBM
-    Quantum Experience backends available to this provider. An instance of
+    Quantum backends available to this provider. An instance of
     this class is used as a callable attribute to the :class:`IBMProvider`
     class. This allows a convenient way to query for all backends or to access
     a specific backend::
@@ -64,7 +64,7 @@ class IBMBackendService:
         """IBMBackendService constructor.
 
         Args:
-            provider: IBM Quantum Experience account provider.
+            provider: IBM Quantum account provider.
         """
         super().__init__()
 

@@ -17,7 +17,7 @@ Job (:mod:`qiskit_ibm.job`)
 
 .. currentmodule:: qiskit_ibm.job
 
-Modules representing IBM Quantum Experience jobs.
+Modules representing IBM Quantum jobs.
 
 Classes
 =========

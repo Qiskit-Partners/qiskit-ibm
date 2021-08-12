@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""IBM Quantum Experience job."""
+"""IBM Quantum job."""
 
 import logging
 from typing import Dict, Optional, Tuple, Any, List, Callable, Union
@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 
 
 class IBMJob(Job):
-    """Representation of a job that executes on an IBM Quantum Experience backend.
+    """Representation of a job that executes on an IBM Quantum backend.
 
     The job may be executed on a simulator or a real device. A new ``IBMJob``
     instance is returned when you call
@@ -224,7 +224,7 @@ class IBMJob(Job):
         """Return the result of the job.
 
         Note:
-            Some IBM Quantum Experience job results can only be read once. A
+            Some IBM Quantum job results can only be read once. A
             second attempt to query the server for the same job will fail,
             since the job has already been "consumed".
 

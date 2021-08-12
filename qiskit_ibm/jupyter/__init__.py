@@ -60,7 +60,7 @@ Detailed information on a single backend
     backend
 
 
-IBM Quantum Experience (IQX) dashboard
+IBM Quantum dashboard
 ======================================
 
 .. code-block:: python

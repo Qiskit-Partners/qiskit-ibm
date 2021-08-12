@@ -41,7 +41,7 @@ pip install qiskit-ibm
    The command above stores your credentials locally in a configuration file called `qiskitrc`.
    By default, this file is located in `$HOME/.qiskit`, where `$HOME` is your home directory.
 
-### Accessing your IBM Quantum Experience backends
+### Accessing your IBM Quantum backends
 
 After calling `IBMAccount.save_account()`, your credentials will be stored on disk.
 Once they are stored, at any point in the future you can load and use them
@@ -64,7 +64,7 @@ provider = account.enable_account('MY_API_TOKEN')
 backend = provider.get_backend('ibmq_qasm_simulator')
 ```
 
-By default, all IBM Quantum Experience accounts have access to the same, open project
+By default, all IBM Quantum accounts have access to the same, open project
 (hub: `ibm-q`, group: `open`, project: `main`). For convenience, the
 `IBMAccount.load_account()` and `IBMAccount.enable_account()` methods will return a provider
 for that project. If you have access to other projects, you can use:

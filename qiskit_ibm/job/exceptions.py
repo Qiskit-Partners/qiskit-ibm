@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Exceptions related to IBM Quantum Experience jobs."""
+"""Exceptions related to IBM Quantum jobs."""
 
 from qiskit.providers.exceptions import JobError, JobTimeoutError
 

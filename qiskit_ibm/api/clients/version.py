@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Client for determining the version of an IBM Quantum Experience service."""
+"""Client for determining the version of an IBM Quantum service."""
 
 from typing import Dict, Union, Any
 
@@ -21,7 +21,7 @@ from .base import BaseClient
 
 
 class VersionClient(BaseClient):
-    """Client for determining the version of an IBM Quantum Experience service."""
+    """Client for determining the version of an IBM Quantum service."""
 
     def __init__(self, url: str, **request_kwargs: Any) -> None:
         """VersionClient constructor.

@@ -11,7 +11,7 @@
 # that they have been altered from the originals.
 # pylint: disable=invalid-name
 
-"""Interactive error map for IBM Quantum Experience devices."""
+"""Interactive error map for IBM Quantum devices."""
 
 import math
 from typing import Tuple, Union

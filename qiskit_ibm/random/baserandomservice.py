@@ -37,7 +37,7 @@ class BaseRandomService(ABC):
 
         Args:
             name: Name of the extractor.
-            provider: IBM Quantum Experience account provider.
+            provider: IBM Quantum account provider.
             client: Client used to communicate with the server.
             methods: Service methods.
         """

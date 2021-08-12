@@ -17,7 +17,7 @@ Credentials (:mod:`qiskit_ibm.credentials`)
 
 .. currentmodule:: qiskit_ibm.credentials
 
-Utilities for working with IBM Quantum Experience account credentials.
+Utilities for working with IBM Quantum account credentials.
 
 Classes
 =========
@@ -54,7 +54,7 @@ logger = logging.getLogger(__name__)
 def discover_credentials(
         qiskitrc_filename: Optional[str] = None
 ) -> Tuple[Dict[HubGroupProject, Credentials], Dict]:
-    """Automatically discover credentials for IBM Quantum Experience.
+    """Automatically discover credentials for IBM Quantum.
 
     This method looks for credentials in the following places in order and
     returns the first ones found:

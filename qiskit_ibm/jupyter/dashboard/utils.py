@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Utility functions for the IBM Quantum Experience dashboard."""
+"""Utility functions for the IBM Quantum dashboard."""
 
 from collections import namedtuple
 

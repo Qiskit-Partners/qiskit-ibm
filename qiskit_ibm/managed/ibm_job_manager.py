@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Job Manager used to manage jobs for IBM Quantum Experience."""
+"""Job Manager used to manage jobs for IBM Quantum."""
 
 import logging
 from typing import List, Optional, Union, Any
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class IBMJobManager:
-    """Job Manager for IBM Quantum Experience.
+    """Job Manager for IBM Quantum.
 
     The Job Manager is a higher level mechanism for handling
     :class:`jobs<qiskit_ibm.job.IBMJob>` composed of

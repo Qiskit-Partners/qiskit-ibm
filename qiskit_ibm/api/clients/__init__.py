@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""IBM Quantum Experience API clients."""
+"""IBM Quantum API clients."""
 
 from .base import BaseClient, WebsocketClientCloseCode
 from .account import AccountClient

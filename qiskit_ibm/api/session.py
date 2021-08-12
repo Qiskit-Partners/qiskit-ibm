@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Session customized for IBM Quantum Experience access."""
+"""Session customized for IBM Quantum access."""
 
 import os
 import re
@@ -73,7 +73,7 @@ class PostForcelistRetry(Retry):
     Retrying of ``POST`` requests are allowed *only* when the status code
     returned is on the ``STATUS_FORCELIST``. While ``POST``
     requests are recommended not to be retried due to not being idempotent,
-    the IBM Quantum Experience API guarantees that retrying on specific 5xx errors is safe.
+    the IBM Quantum API guarantees that retrying on specific 5xx errors is safe.
     """
 
     def increment(  # type: ignore[no-untyped-def]
@@ -123,7 +123,7 @@ class RetrySession(Session):
     """Custom session with retry and handling of specific parameters.
 
     This is a child class of ``requests.Session``. It has its own retry
-    policy and handles IBM Quantum Experience specific parameters.
+    policy and handles IBM Quantum specific parameters.
     """
 
     def __init__(
@@ -245,7 +245,7 @@ class RetrySession(Session):
         Args:
             method: Method for the new request (e.g. ``POST``).
             url: URL for the new request.
-            bare: If ``True``, do not send IBM Quantum Experience specific information
+            bare: If ``True``, do not send IBM Quantum specific information
                 (such as access token) in the request or modify the input `url`.
             **kwargs: Additional arguments for the request.
 

@@ -298,7 +298,7 @@ class TestIBMAccountAccounts(IBMTestCase):
             with self.subTest(invalid_token=invalid_token):
                 with self.assertRaises(IBMAccountCredentialsInvalidToken) as context_manager:
                     self.account.save_account(token=invalid_token)
-                self.assertIn('Invalid IBM Quantum Experience token',
+                self.assertIn('Invalid IBM Quantum token',
                               str(context_manager.exception))
 
 

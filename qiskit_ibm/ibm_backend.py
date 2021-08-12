@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Module for interfacing with an IBM Quantum Experience Backend."""
+"""Module for interfacing with an IBM Quantum Backend."""
 
 import logging
 import warnings
@@ -118,9 +118,9 @@ class IBMBackend(Backend):
 
         Args:
             configuration: Backend configuration.
-            provider: IBM Quantum Experience account provider
-            credentials: IBM Quantum Experience credentials.
-            api_client: IBM Quantum Experience client used to communicate with the server.
+            provider: IBM Quantum account provider
+            credentials: IBM Quantum credentials.
+            api_client: IBM Quantum client used to communicate with the server.
         """
         super().__init__(provider=provider, configuration=configuration)
 
@@ -813,7 +813,7 @@ class IBMBackend(Backend):
 
 
 class IBMSimulator(IBMBackend):
-    """Backend class interfacing with an IBM Quantum Experience simulator."""
+    """Backend class interfacing with an IBM Quantum simulator."""
 
     @classmethod
     def _default_options(cls) -> Options:
@@ -887,7 +887,7 @@ class IBMSimulator(IBMBackend):
 
 
 class IBMRetiredBackend(IBMBackend):
-    """Backend class interfacing with an IBM Quantum Experience device no longer available."""
+    """Backend class interfacing with an IBM Quantum device no longer available."""
 
     def __init__(
             self,
@@ -900,9 +900,9 @@ class IBMRetiredBackend(IBMBackend):
 
         Args:
             configuration: Backend configuration.
-            provider: IBM Quantum Experience account provider
-            credentials: IBM Quantum Experience credentials.
-            api_client: IBM Quantum Experience client used to communicate with the server.
+            provider: IBM Quantum account provider
+            credentials: IBM Quantum credentials.
+            api_client: IBM Quantum client used to communicate with the server.
         """
         super().__init__(configuration, provider, credentials, api_client)
         self._status = BackendStatus(

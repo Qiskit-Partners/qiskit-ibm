@@ -64,7 +64,7 @@ def most_busy_backend(provider: IBMProvider) -> IBMBackend:
     local backends that do not have this are not considered.
 
     Args:
-        provider: IBM Quantum Experience account provider.
+        provider: IBM Quantum account provider.
 
     Returns:
         The most busy backend.
@@ -206,8 +206,8 @@ def get_provider(
 
     Args:
         account: An `IBMAccount` instance.
-        qe_token: IBM Quantum Experience token.
-        qe_url: IBM Quantum Experience auth URL.
+        qe_token: IBM Quantum token.
+        qe_url: IBM Quantum auth URL.
         default: If `True`, the default open access project provider is returned.
             Otherwise, a non open access project provider is returned.
 

@@ -43,7 +43,7 @@ class IBMRandomService:
         """IBMRandomService constructor.
 
         Args:
-            provider: IBM Quantum Experience account provider.
+            provider: IBM Quantum account provider.
         """
         self._provider = provider
         if provider.credentials.extractor_url:

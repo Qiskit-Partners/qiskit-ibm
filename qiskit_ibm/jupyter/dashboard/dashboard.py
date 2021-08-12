@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""The core IBM Quantum Experience dashboard launcher."""
+"""The core IBM Quantum dashboard launcher."""
 
 import threading
 from typing import List, Tuple, Dict, Any, Optional
@@ -74,7 +74,7 @@ def _add_device_to_list(backend: BackendWithProviders,
 
 
 class IQXDashboard(Subscriber):
-    """An IBM Quantum Experience dashboard.
+    """An IBM Quantum dashboard.
 
     This dashboard shows both device and job information.
     """
@@ -323,7 +323,7 @@ def build_dashboard_widget() -> AccordionWithThread:
 
 @magics_class
 class IQXDashboardMagic(Magics):
-    """A class for enabling/disabling the IBM Quantum Experience dashboard."""
+    """A class for enabling/disabling the IBM Quantum dashboard."""
 
     @line_magic
     def iqx_dashboard(self, line='', cell=None) -> None:
@@ -336,12 +336,12 @@ class IQXDashboardMagic(Magics):
                 account.load_account()
             except Exception:
                 raise QiskitError(
-                    "Could not load IBM Quantum Experience account from the local file.")
+                    "Could not load IBM Quantum account from the local file.")
             else:
                 pro = account.providers()
                 if not pro:
                     raise QiskitError(
-                        "No providers found.  Must load your IBM Quantum Experience account.")
+                        "No providers found. Must load your IBM Quantum account.")
         _IQX_DASHBOARD.stop_dashboard()
         _IQX_DASHBOARD.start_dashboard()
 
@@ -353,4 +353,4 @@ class IQXDashboardMagic(Magics):
 
 
 _IQX_DASHBOARD = IQXDashboard()
-"""The Jupyter IBM Quantum Experience dashboard instance."""
+"""The Jupyter IBM Quantum dashboard instance."""

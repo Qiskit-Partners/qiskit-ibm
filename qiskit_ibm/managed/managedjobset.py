@@ -234,7 +234,7 @@ class ManagedJobSet:
         the timeout is reached.
 
         Note:
-            Some IBM Quantum Experience job results can only be read once. A
+            Some IBM Quantum job results can only be read once. A
             second attempt to query the server for the same job will fail,
             since the job has already been "consumed".
 

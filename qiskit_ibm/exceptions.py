@@ -40,12 +40,12 @@ class IBMAccountCredentialsInvalidFormat(IBMAccountError):
 
 
 class IBMAccountCredentialsInvalidToken(IBMAccountError):
-    """Errors raised when an IBM Quantum Experience token is invalid."""
+    """Errors raised when an IBM Quantum token is invalid."""
     pass
 
 
 class IBMAccountCredentialsInvalidUrl(IBMAccountError):
-    """Errors raised when an IBM Quantum Experience URL is invalid."""
+    """Errors raised when an IBM Quantum URL is invalid."""
     pass
 
 

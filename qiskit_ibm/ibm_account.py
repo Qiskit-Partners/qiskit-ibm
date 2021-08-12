@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Factory and Account manager for IBM Quantum Experience."""
+"""Factory and Account manager for IBM Quantum."""
 
 import logging
 from typing import Dict, List, Union, Callable, Optional, Any
@@ -56,11 +56,11 @@ class IBMAccount:
             project: Optional[str] = None,
             **kwargs: Any
     ) -> Optional[IBMProvider]:
-        """Authenticate against IBM Quantum Experience for use during the session.
+        """Authenticate against IBM Quantum for use during the session.
 
         Args:
-            token: IBM Quantum Experience token.
-            url: URL for the IBM Quantum Experience authentication server.
+            token: IBM Quantum token.
+            url: URL for the IBM Quantum authentication server.
             hub: Name of the hub to use.
             group: Name of the group to use.
             project: Name of the project to use.
@@ -74,17 +74,17 @@ class IBMAccount:
             is returned. Otherwise the provider for the open access project is returned.
 
         Raises:
-            IBMAccountError: If an IBM Quantum Experience account is already in
+            IBMAccountError: If an IBM Quantum account is already in
                 use for the session.
             IBMAccountCredentialsInvalidUrl: If the URL specified is not
-                a valid IBM Quantum Experience authentication URL.
+                a valid IBM Quantum authentication URL.
             IBMProviderError: If no provider matches the specified criteria,
                 or more than one provider matches the specified criteria.
         """
-        # Check if an IBM Quantum Experience account is already in use.
+        # Check if an IBM Quantum account is already in use.
         if self._credentials:
             raise IBMAccountError(
-                'An IBM Quantum Experience account is already in use for the session.')
+                'An IBM Quantum account is already in use for the session.')
 
         # Check the version used by these credentials.
         credentials = Credentials(token, url, **kwargs)
@@ -123,13 +123,13 @@ class IBMAccount:
         """
         if not self._credentials:
             raise IBMAccountCredentialsNotFound(
-                'No IBM Quantum Experience account is in use for the session.')
+                'No IBM Quantum account is in use for the session.')
 
         self._credentials = None
         self._providers = OrderedDict()
 
     def load_account(self) -> Optional[IBMProvider]:
-        """Authenticate against IBM Quantum Experience from stored credentials.
+        """Authenticate against IBM Quantum from stored credentials.
 
         Returns:
             If the configuration file specifies a default provider, it is returned.
@@ -138,9 +138,9 @@ class IBMAccount:
         Raises:
             IBMAccountCredentialsInvalidFormat: If the default provider stored on
                 disk could not be parsed.
-            IBMAccountCredentialsNotFound: If no IBM Quantum Experience credentials
+            IBMAccountCredentialsNotFound: If no IBM Quantum credentials
                 can be found.
-            IBMAccountCredentialsInvalidUrl: If invalid IBM Quantum Experience
+            IBMAccountCredentialsInvalidUrl: If invalid IBM Quantum
                 credentials are found.
             IBMProviderError: If the default provider stored on disk could not
                 be found.
@@ -156,11 +156,11 @@ class IBMAccount:
 
         if not credentials_list:
             raise IBMAccountCredentialsNotFound(
-                'No IBM Quantum Experience credentials found.')
+                'No IBM Quantum credentials found.')
 
         credentials = credentials_list[0]
         # Explicitly check via a server call, to allow environment auth URLs
-        # contain IBM Quantum Experience v2 URL (but not auth) slipping through.
+        # contain IBM Quantum v2 URL (but not auth) slipping through.
         version_info = self._check_api_version(credentials)
 
         # Check the URL is a valid authentication URL.
@@ -218,8 +218,8 @@ class IBMAccount:
             `hub`, `group`, `project` must be specified.
 
         Args:
-            token: IBM Quantum Experience token.
-            url: URL for the IBM Quantum Experience authentication server.
+            token: IBM Quantum token.
+            url: URL for the IBM Quantum authentication server.
             hub: Name of the hub for the default provider to store on disk.
             group: Name of the group for the default provider to store on disk.
             project: Name of the project for the default provider to store on disk.
@@ -230,9 +230,9 @@ class IBMAccount:
 
         Raises:
             IBMAccountCredentialsInvalidUrl: If the `url` is not a valid
-                IBM Quantum Experience authentication URL.
+                IBM Quantum authentication URL.
             IBMAccountCredentialsInvalidToken: If the `token` is not a valid
-                IBM Quantum Experience token.
+                IBM Quantum token.
             IBMAccountValueError: If only one or two parameters from `hub`, `group`,
                 `project` are specified.
         """
@@ -267,9 +267,9 @@ class IBMAccount:
         """Delete the saved account from disk.
 
         Raises:
-            IBMAccountCredentialsNotFound: If no valid IBM Quantum Experience
+            IBMAccountCredentialsNotFound: If no valid IBM Quantum
                 credentials can be found on disk.
-            IBMAccountCredentialsInvalidUrl: If invalid IBM Quantum Experience
+            IBMAccountCredentialsInvalidUrl: If invalid IBM Quantum
                 credentials are found on disk.
         """
         stored_credentials, _ = read_credentials_from_qiskitrc()
@@ -293,7 +293,7 @@ class IBMAccount:
             A dictionary with information about the account stored on disk.
 
         Raises:
-            IBMAccountCredentialsInvalidUrl: If invalid IBM Quantum Experience
+            IBMAccountCredentialsInvalidUrl: If invalid IBM Quantum
                 credentials are found on disk.
         """
         stored_credentials, _ = read_credentials_from_qiskitrc()
@@ -312,7 +312,7 @@ class IBMAccount:
         }
 
     def active_account(self) -> Optional[Dict[str, str]]:
-        """Return the IBM Quantum Experience account currently in use for the session.
+        """Return the IBM Quantum account currently in use for the session.
 
         Returns:
             Information about the account currently in the session.

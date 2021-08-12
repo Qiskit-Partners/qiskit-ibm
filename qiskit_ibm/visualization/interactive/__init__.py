@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""IBM Quantum Experience visualization library."""
+"""IBM Quantum visualization library."""
 
 import pkg_resources
 # pylint: disable=not-an-iterable

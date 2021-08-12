@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Exceptions related to IBM Quantum Experience experiments."""
+"""Exceptions related to IBM Quantum experiments."""
 
 from ..exceptions import IBMError
 

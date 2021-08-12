@@ -57,7 +57,7 @@ class TestCredentials(IBMTestCase):
             with self.assertRaises(IBMAccountError) as context_manager:
                 account.load_account()
 
-        self.assertIn('No IBM Quantum Experience credentials found',
+        self.assertIn('No IBM Quantum credentials found',
                       str(context_manager.exception))
 
     def test_store_credentials_overwrite(self) -> None:
