@@ -290,7 +290,7 @@ class IBMAccount:
 
     @staticmethod
     def stored_account() -> Dict[str, str]:
-        """List the account stored on disk.
+        """List the account saved on disk.
 
         Returns:
             A dictionary with information about the account stored on disk.
@@ -394,6 +394,15 @@ class IBMAccount:
                                    .format(hub, group, project))
 
         return providers[0]
+
+    enable = enable_account
+    disable = disable_account
+    load = load_account
+    save = save_account
+    delete = delete_account
+    saved = stored_account
+    active = active_account
+    provider = get_provider
 
     # Private functions.
 
