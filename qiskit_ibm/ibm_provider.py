@@ -51,10 +51,37 @@ logger = logging.getLogger(__name__)
 class IBMProvider(Provider):
     """Provider for a single IBM Quantum account.
 
-    The account provider class provides access to the IBM Quantum
+    This class provides access to the IBM Quantum
     services available to this account.
 
-    You can access a provider by enabling an account with the
+    You can access the default open provider by instantiating this class
+    and providing the API token.
+
+        from qiskit_ibm import IBMProvider
+        provider = IBMProvider(token=<INSERT_IBM_QUANTUM_TOKEN>)
+
+    To access a different provider, specify the hub, group and project name of the
+    desired provider during instantiation.
+
+        from qiskit_ibm import IBMProvider
+        provider = IBMProvider(token=<INSERT_IBM_QUANTUM_TOKEN>, hub='a', group='b', project='c')
+
+    Instead of passing in the parameters during instantiation, you can also set the environment
+    variables QISKIT_IBM_API_TOKEN, QISKIT_IBM_API_URL, QISKIT_IBM_HUB, QISKIT_IBM_GROUP
+    and QISKIT_IBM_PROJECT and then instantiate the provider like below.
+
+        from qiskit_ibm import IBMProvider
+        provider = IBMProvider()
+
+    If parameters are not passed and environment variables are not set then this class looks
+    for credentials (token / url) and default provider (hub / group / project) stored in the
+    qiskitrc file using the :meth:`IBMAccount.save_account()<IBMAccount.save_account>` method.
+
+    `token` is the only required attribute that needs to be set using one of the above methods.
+    If no `url` is set, it defaults to 'https://auth.quantum-computing.ibm.com/api'.
+    If no `hub`, `group` and `project` is set, it defaults to the open provider. (ibm-q/open/main)
+
+    You can also access a provider by enabling an account with the
     :meth:`IBMAccount.enable_account()<IBMAccount.enable_account>` method, which
     returns the default provider you have access to::
 
@@ -147,6 +174,7 @@ class IBMProvider(Provider):
         stored_group = None
         stored_project = None
 
+        # This block executes when IBMProvider is instantiated directly by user
         if account is None:
             if token:
                 if not isinstance(token, str):
@@ -157,7 +185,7 @@ class IBMProvider(Provider):
                 account_credentials = Credentials(token=token, url=url, **kwargs)
                 preferences = {}  # type: Optional[Dict]
             else:
-                # Check for valid credentials.
+                # Check for valid credentials in env variables or qiskitrc file.
                 try:
                     stored_credentials, preferences = discover_credentials()
                 except HubGroupProjectInvalidStateError as ex:
@@ -195,6 +223,7 @@ class IBMProvider(Provider):
                                      **account_credentials.connection_parameters())
             service_urls = auth_client.current_service_urls()
         else:
+            # This block executes when IBMProvider is instantiated using IBMAccount
             account_credentials = account._credentials
             auth_client = account._auth_client
             service_urls = account._service_urls

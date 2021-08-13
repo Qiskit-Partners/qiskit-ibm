@@ -127,6 +127,10 @@ class IBMAccount:
 
         self._credentials = None
         self._providers = OrderedDict()
+        self._auth_client = None
+        self._service_urls = None
+        self._user_hubs = None
+        self._preferences = None
 
     def load_account(self) -> Optional[IBMProvider]:
         """Authenticate against IBM Quantum from stored credentials.
@@ -155,8 +159,7 @@ class IBMAccount:
         credentials_list = list(stored_credentials.values())
 
         if not credentials_list:
-            raise IBMAccountCredentialsNotFound(
-                'No IBM Quantum credentials found.')
+            raise IBMAccountCredentialsNotFound('No IBM Quantum credentials found.')
 
         credentials = credentials_list[0]
         # Explicitly check via a server call, to allow environment auth URLs
@@ -421,8 +424,8 @@ class IBMAccount:
         self._service_urls = self._auth_client.current_service_urls()
         self._user_hubs = self._auth_client.user_hubs()
         self._preferences = preferences or {}
-
         self._credentials = credentials
+
         for hub_info in self._user_hubs:
             # Build the provider.
             try:
