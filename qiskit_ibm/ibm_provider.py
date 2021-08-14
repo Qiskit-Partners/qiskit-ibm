@@ -170,8 +170,8 @@ class IBMProvider(Provider):
         """
         super().__init__()
 
-        # This block executes when IBMProvider is instantiated directly by user
         if account is None:
+            # Executes when IBMProvider is instantiated directly by user
             account_credentials, preferences, hub, group, project = self._resolve_credentials(
                 token=token,
                 url=url,
@@ -185,7 +185,7 @@ class IBMProvider(Provider):
                                      **account_credentials.connection_parameters())
             service_urls = auth_client.current_service_urls()
         else:
-            # This block executes when IBMProvider is instantiated using IBMAccount
+            # Executes when IBMProvider is instantiated using IBMAccount
             account_credentials = account._credentials
             preferences = account._preferences
             auth_client = account._auth_client
@@ -230,9 +230,9 @@ class IBMProvider(Provider):
             **kwargs: Any
     ) -> Tuple[Credentials, Dict, str, str, str]:
 
-        stored_hub = None
-        stored_group = None
-        stored_project = None
+        saved_hub = None
+        saved_group = None
+        saved_project = None
 
         if token:
             if not isinstance(token, str):
@@ -245,13 +245,13 @@ class IBMProvider(Provider):
         else:
             # Check for valid credentials in env variables or qiskitrc file.
             try:
-                stored_credentials, preferences = discover_credentials()
+                saved_credentials, preferences = discover_credentials()
             except HubGroupProjectInvalidStateError as ex:
                 raise IBMAccountCredentialsInvalidFormat(
                     'Invalid provider (hub/group/project) data found {}'
                     .format(str(ex))) from ex
 
-            credentials_list = list(stored_credentials.values())
+            credentials_list = list(saved_credentials.values())
 
             if not credentials_list:
                 raise IBMAccountCredentialsNotFound(
@@ -260,12 +260,12 @@ class IBMProvider(Provider):
             account_credentials = credentials_list[0]
 
             if account_credentials.default_provider:
-                stored_hub, stored_group, stored_project = \
+                saved_hub, saved_group, saved_project = \
                     account_credentials.default_provider.to_tuple()
             else:
-                stored_hub = account_credentials.hub
-                stored_group = account_credentials.group
-                stored_project = account_credentials.project
+                saved_hub = account_credentials.hub
+                saved_group = account_credentials.group
+                saved_project = account_credentials.project
 
         version_info = self._check_api_version(account_credentials)
 
@@ -276,6 +276,23 @@ class IBMProvider(Provider):
                 'Valid authentication URL: {}.'
                 .format(account_credentials.url, QISKIT_IBM_API_URL))
 
+        hub, group, project = self._resolve_hub_group_project(
+            hub=hub, group=group, project=project, saved_hub=saved_hub, saved_group=saved_group,
+            saved_project=saved_project, url=account_credentials.url
+        )
+
+        return account_credentials, preferences, hub, group, project
+
+    def _resolve_hub_group_project(
+            self,
+            hub: Optional[str] = None,
+            group: Optional[str] = None,
+            project: Optional[str] = None,
+            saved_hub: Optional[str] = None,
+            saved_group: Optional[str] = None,
+            saved_project: Optional[str] = None,
+            url: Optional[str] = None
+    ) -> Tuple[str, str, str]:
         # If any `hub`, `group`, or `project` is specified, make sure all are set.
         if any([hub, group, project]) and not all([hub, group, project]):
             raise IBMProviderValueError('The hub, group, and project parameters '
@@ -284,16 +301,16 @@ class IBMProvider(Provider):
                                         .format(hub, group, project))
 
         if not all([hub, group, project]):
-            hub = stored_hub
-            group = stored_group
-            project = stored_project
+            hub = saved_hub
+            group = saved_group
+            project = saved_project
 
-        if not all([hub, group, project]):
+        if not all([hub, group, project]) and url == QISKIT_IBM_API_URL:
             hub = 'ibm-q'
             group = 'open'
             project = 'main'
 
-        return account_credentials, preferences, hub, group, project
+        return hub, group, project
 
     def _construct_provider_credentials(
             self,
