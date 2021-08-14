@@ -13,7 +13,7 @@
 """Provider for a single IBM Quantum account."""
 
 import logging
-from typing import Dict, List, Optional, Any, Callable, Union
+from typing import Dict, List, Optional, Any, Callable, Tuple, Union
 from collections import OrderedDict
 import traceback
 import copy
@@ -170,54 +170,16 @@ class IBMProvider(Provider):
         """
         super().__init__()
 
-        stored_hub = None
-        stored_group = None
-        stored_project = None
-
         # This block executes when IBMProvider is instantiated directly by user
         if account is None:
-            if token:
-                if not isinstance(token, str):
-                    raise IBMAccountCredentialsInvalidToken(
-                        'Invalid IBM Quantum token '
-                        'found: "{}" of type {}.'.format(token, type(token)))
-                url = url or os.getenv('QISKIT_IBM_API_URL') or QISKIT_IBM_API_URL
-                account_credentials = Credentials(token=token, url=url, **kwargs)
-                preferences = {}  # type: Optional[Dict]
-            else:
-                # Check for valid credentials in env variables or qiskitrc file.
-                try:
-                    stored_credentials, preferences = discover_credentials()
-                except HubGroupProjectInvalidStateError as ex:
-                    raise IBMAccountCredentialsInvalidFormat(
-                        'Invalid provider (hub/group/project) data found {}'
-                        .format(str(ex))) from ex
-
-                credentials_list = list(stored_credentials.values())
-
-                if not credentials_list:
-                    raise IBMAccountCredentialsNotFound(
-                        'No IBM Quantum credentials found.')
-
-                account_credentials = credentials_list[0]
-
-                if account_credentials.default_provider:
-                    stored_hub, stored_group, stored_project = \
-                        account_credentials.default_provider.to_tuple()
-                else:
-                    stored_hub = account_credentials.hub
-                    stored_group = account_credentials.group
-                    stored_project = account_credentials.project
-
-            version_info = self._check_api_version(account_credentials)
-
-            # Check the URL is a valid authentication URL.
-            if not version_info['new_api'] or 'api-auth' not in version_info:
-                raise IBMAccountCredentialsInvalidUrl(
-                    'The URL specified ({}) is not an IBM Quantum authentication URL. '
-                    'Valid authentication URL: {}.'
-                    .format(account_credentials.url, QISKIT_IBM_API_URL))
-
+            account_credentials, preferences, hub, group, project = self._resolve_credentials(
+                token=token,
+                url=url,
+                hub=hub,
+                group=group,
+                project=project,
+                **kwargs
+            )
             auth_client = AuthClient(account_credentials.token,
                                      account_credentials.base_url,
                                      **account_credentials.connection_parameters())
@@ -225,9 +187,94 @@ class IBMProvider(Provider):
         else:
             # This block executes when IBMProvider is instantiated using IBMAccount
             account_credentials = account._credentials
+            preferences = account._preferences
             auth_client = account._auth_client
             service_urls = account._service_urls
-            preferences = account._preferences
+
+        self.credentials = self._construct_provider_credentials(
+            account_credentials,
+            preferences,
+            auth_client,
+            service_urls,
+            hub,
+            group,
+            project
+        )
+        self._account = account
+        self._api_client = AccountClient(self.credentials,
+                                         **self.credentials.connection_parameters())
+
+        # Initialize the internal list of backends.
+        self.__backends: Dict[str, IBMBackend] = {}
+        self._backend = IBMBackendService(self)
+        self.backends = self._backend.backends  # type: ignore[assignment]
+
+        # Initialize other services.
+        self._random = IBMRandomService(self) if self.credentials.extractor_url else None
+        self._experiment = IBMExperimentService(self) if self.credentials.experiment_url else None
+        self._runtime = IBMRuntimeService(self) \
+            if self.credentials.runtime_url else None
+
+        self._services = {'backend': self._backend,
+                          'random': self._random,
+                          'experiment': self._experiment,
+                          'runtime': self._runtime}
+
+    def _resolve_credentials(
+            self,
+            token: Optional[str] = None,
+            url: Optional[str] = None,
+            hub: Optional[str] = None,
+            group: Optional[str] = None,
+            project: Optional[str] = None,
+            **kwargs: Any
+    ) -> Tuple[Credentials, Dict, str, str, str]:
+
+        stored_hub = None
+        stored_group = None
+        stored_project = None
+
+        if token:
+            if not isinstance(token, str):
+                raise IBMAccountCredentialsInvalidToken(
+                    'Invalid IBM Quantum token '
+                    'found: "{}" of type {}.'.format(token, type(token)))
+            url = url or os.getenv('QISKIT_IBM_API_URL') or QISKIT_IBM_API_URL
+            account_credentials = Credentials(token=token, url=url, **kwargs)
+            preferences = {}  # type: Optional[Dict]
+        else:
+            # Check for valid credentials in env variables or qiskitrc file.
+            try:
+                stored_credentials, preferences = discover_credentials()
+            except HubGroupProjectInvalidStateError as ex:
+                raise IBMAccountCredentialsInvalidFormat(
+                    'Invalid provider (hub/group/project) data found {}'
+                    .format(str(ex))) from ex
+
+            credentials_list = list(stored_credentials.values())
+
+            if not credentials_list:
+                raise IBMAccountCredentialsNotFound(
+                    'No IBM Quantum credentials found.')
+
+            account_credentials = credentials_list[0]
+
+            if account_credentials.default_provider:
+                stored_hub, stored_group, stored_project = \
+                    account_credentials.default_provider.to_tuple()
+            else:
+                stored_hub = account_credentials.hub
+                stored_group = account_credentials.group
+                stored_project = account_credentials.project
+
+        version_info = self._check_api_version(account_credentials)
+
+        # Check the URL is a valid authentication URL.
+        if not version_info['new_api'] or 'api-auth' not in version_info:
+            raise IBMAccountCredentialsInvalidUrl(
+                'The URL specified ({}) is not an IBM Quantum authentication URL. '
+                'Valid authentication URL: {}.'
+                .format(account_credentials.url, QISKIT_IBM_API_URL))
 
         # If any `hub`, `group`, or `project` is specified, make sure all are set.
         if any([hub, group, project]) and not all([hub, group, project]):
@@ -246,6 +293,18 @@ class IBMProvider(Provider):
             group = 'open'
             project = 'main'
 
+        return account_credentials, preferences, hub, group, project
+
+    def _construct_provider_credentials(
+            self,
+            account_credentials: Credentials,
+            preferences: Optional[Dict],
+            auth_client: AuthClient,
+            service_urls: Dict[str, str],
+            hub: str,
+            group: str,
+            project: str
+    ) -> Credentials:
         credentials = Credentials(
             account_credentials.token,
             access_token=auth_client.current_access_token(),
@@ -261,27 +320,7 @@ class IBMProvider(Provider):
         )
         credentials.preferences = \
             preferences.get(credentials.unique_id(), {})
-
-        self.credentials = credentials
-        self._account = account
-        self._api_client = AccountClient(credentials,
-                                         **credentials.connection_parameters())
-
-        # Initialize the internal list of backends.
-        self.__backends: Dict[str, IBMBackend] = {}
-        self._backend = IBMBackendService(self)
-        self.backends = self._backend.backends  # type: ignore[assignment]
-
-        # Initialize other services.
-        self._random = IBMRandomService(self) if credentials.extractor_url else None
-        self._experiment = IBMExperimentService(self) if credentials.experiment_url else None
-        self._runtime = IBMRuntimeService(self) \
-            if credentials.runtime_url else None
-
-        self._services = {'backend': self._backend,
-                          'random': self._random,
-                          'experiment': self._experiment,
-                          'runtime': self._runtime}
+        return credentials
 
     @property
     def _backends(self) -> Dict[str, IBMBackend]:
