@@ -27,51 +27,68 @@ pip install qiskit-ibm
 
 1. Create an IBM Quantum account or log in to your existing account by visiting the [IBM Quantum login page].
 
-2. Copy (and/or optionally regenerate) your API token from your
+1. Copy (and/or optionally regenerate) your API token from your
    [IBM Quantum account page].
 
-3. Take your token from step 2, here called `MY_API_TOKEN`, and run:
+1. Take your token from step 2, here called `MY_API_TOKEN`, and run:
 
    ```python
-   from qiskit_ibm import IBMAccount
-   account = IBMAccount()
-   account.save_account('MY_API_TOKEN')
+   from qiskit_ibm import IBMProvider
+   provider = IBMProvider('MY_API_TOKEN')
    ```
 
-   The command above stores your credentials locally in a configuration file called `qiskitrc`.
-   By default, this file is located in `$HOME/.qiskit`, where `$HOME` is your home directory.
+   This provides access to the open access quantum systems (`hub='ibm-q', group='open', project='main'`) by default. To access a different project you can do:
 
-### Accessing your IBM Quantum backends
+   ```python
+   from qiskit_ibm import IBMProvider
+   provider = IBMProvider(token='MY_API_TOKEN', hub='ibm-q', group='test', project='default')
+   ```
 
-After calling `IBMAccount.save_account()`, your credentials will be stored on disk.
-Once they are stored, at any point in the future you can load and use them
-in your program simply via:
+   where `hub='ibm-q', group='test', project='default'` is a sample premium project. You can see the list of projects you have access to on the [IBM Quantum account page].
+
+### Using Credentials from Environment Variables
+Alternatively, the IBM Provider can discover credentials from environment variables:
+```bash
+export QISKIT_IBM_API_TOKEN='MY_API_TOKEN'
+export QISKIT_IBM_HUB='ibm-q'
+export QISKIT_IBM_GROUP='test'
+export QISKIT_IBM_PROJECT='default'
+```
+
+Then instantiate the provider without any arguments and access the backends:
+```python
+from qiskit_ibm import IBMProvider
+provider = IBMProvider()
+
+# display current supported backends
+print(provider.backends())
+
+# get IBM's simulator backend
+simulator_backend = provider.get_backend('ibmq_qasm_simulator')
+```
+
+### Using Credentials from qiskitrc file
+As another alternative, you can save the credentials and default project using the `IBMAccount` class:
 
 ```python
 from qiskit_ibm import IBMAccount
 account = IBMAccount()
-provider = account.load_account()
-backend = provider.get_backend('ibmq_qasm_simulator')
+account.save(token='MY_API_TOKEN', hub='ibm-q', group='test', project='default')
 ```
 
-Alternatively, if you do not want to save your credentials to disk and only
-intend to use them during the current session, you can use:
+The command above stores your credentials and default project locally in a configuration file called `qiskitrc`.
+By default, this file is located in `$HOME/.qiskit`, where `$HOME` is your home directory.
 
+Then instantiate the provider without any arguments and access the backends:
 ```python
-from qiskit_ibm import IBMAccount
-account = IBMAccount()
-provider = account.enable_account('MY_API_TOKEN')
-backend = provider.get_backend('ibmq_qasm_simulator')
-```
+from qiskit_ibm import IBMProvider
+provider = IBMProvider()
 
-By default, all IBM Quantum accounts have access to the same, open project
-(hub: `ibm-q`, group: `open`, project: `main`). For convenience, the
-`IBMAccount.load_account()` and `IBMAccount.enable_account()` methods will return a provider
-for that project. If you have access to other projects, you can use:
+# display current supported backends
+print(provider.backends())
 
-```python
-account = IBMAccount()
-provider_2 = account.get_provider(hub='MY_HUB', group='MY_GROUP', project='MY_PROJECT')
+# get IBM's simulator backend
+simulator_backend = provider.get_backend('ibmq_qasm_simulator')
 ```
 
 ## Contribution Guidelines
