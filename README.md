@@ -7,6 +7,9 @@
 This project contains a provider that allows accessing the **[IBM Quantum]**
 systems and simulators.
 
+## Migrating
+If you are migrating from `qiskit-ibmq-provider` please follow the instructions in the [migration guide].
+
 ## Installation
 
 > **The Qiskit IBM Provider requires** `qiskit-terra>=0.18.1`!
@@ -131,3 +134,4 @@ project at different levels. If you use Qiskit, please cite as per the included
 [many people]: https://github.com/Qiskit-Partners/qiskit-ibm/graphs/contributors
 [BibTeX file]: https://github.com/Qiskit/qiskit/blob/master/Qiskit.bib
 [Apache License 2.0]: https://github.com/Qiskit-Partners/qiskit-ibm/blob/main/LICENSE.txt
+[migration guide]: https://github.com/Qiskit-Partners/qiskit-ibm/blob/main/MIGRATING.md
