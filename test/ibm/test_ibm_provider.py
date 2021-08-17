@@ -24,6 +24,7 @@ from qiskit_ibm.ibm_provider import IBMProvider
 from qiskit_ibm.ibm_backend import IBMSimulator, IBMBackend
 from qiskit_ibm.ibm_backend_service import IBMBackendService
 from qiskit_ibm.experiment import IBMExperimentService
+from qiskit_ibm.exceptions import IBMProviderValueError
 from qiskit_ibm.random.ibm_random_service import IBMRandomService
 
 from ..decorators import requires_provider, requires_device, requires_qe_access
@@ -42,6 +43,17 @@ class TestIBMProviderInitialization(IBMTestCase):
     @requires_qe_access
     def test_provider_init_token(self, qe_token, qe_url):
         """Test initializing a provider with only API token."""
+        # pylint: disable=unused-argument
+        provider = IBMProvider(token=qe_token)
+        self.assertIsInstance(provider, IBMProvider)
+        self.assertEqual(provider.credentials.token, qe_token)
+        self.assertEqual(provider.credentials.hub, 'ibm-q')
+        self.assertEqual(provider.credentials.group, 'open')
+        self.assertEqual(provider.credentials.project, 'main')
+
+    @requires_qe_access
+    def test_provider_init_token_url(self, qe_token, qe_url):
+        """Test initializing a provider with API token and URL."""
         provider = IBMProvider(token=qe_token, url=qe_url)
         self.assertIsInstance(provider, IBMProvider)
         self.assertEqual(provider.credentials.token, qe_token)
@@ -61,8 +73,38 @@ class TestIBMProviderInitialization(IBMTestCase):
         self.assertEqual(provider.credentials.project, 'main')
 
     @requires_qe_access
+    def test_provider_init_token_url_hub(self, qe_token, qe_url):
+        """Test initializing a provider with API token, URL and Hub."""
+
+        with self.assertRaises(IBMProviderValueError) as context_manager:
+            IBMProvider(token=qe_token, url=qe_url, hub='ibm-q')
+
+        self.assertIn('The hub, group, and project parameters must all be specified.',
+                      str(context_manager.exception))
+
+    @requires_qe_access
+    def test_provider_init_token_url_group(self, qe_token, qe_url):
+        """Test initializing a provider with API token, URL and Group."""
+
+        with self.assertRaises(IBMProviderValueError) as context_manager:
+            IBMProvider(token=qe_token, url=qe_url, group='open')
+
+        self.assertIn('The hub, group, and project parameters must all be specified.',
+                      str(context_manager.exception))
+
+    @requires_qe_access
+    def test_provider_init_token_url_project(self, qe_token, qe_url):
+        """Test initializing a provider with API token, URL and Project."""
+
+        with self.assertRaises(IBMProviderValueError) as context_manager:
+            IBMProvider(token=qe_token, url=qe_url, project='main')
+
+        self.assertIn('The hub, group, and project parameters must all be specified.',
+                      str(context_manager.exception))
+
+    @requires_qe_access
     def test_provider_init_saved_account(self, qe_token, qe_url):
-        """Test loading an account."""
+        """Test initializing a provider with credentials from qiskitrc file."""
         with custom_qiskitrc(), no_envs(CREDENTIAL_ENV_VARS):
             self.account.save_account(qe_token, url=qe_url)
             provider = IBMProvider()
