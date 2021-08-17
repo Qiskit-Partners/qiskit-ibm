@@ -24,12 +24,15 @@ from qiskit_ibm.ibm_provider import IBMProvider
 from qiskit_ibm.ibm_backend import IBMSimulator, IBMBackend
 from qiskit_ibm.ibm_backend_service import IBMBackendService
 from qiskit_ibm.experiment import IBMExperimentService
-from qiskit_ibm.exceptions import IBMProviderValueError
+from qiskit_ibm.exceptions import (IBMProviderValueError, IBMAccountCredentialsInvalidUrl,
+                                   IBMAccountCredentialsNotFound)
 from qiskit_ibm.random.ibm_random_service import IBMRandomService
 
 from ..decorators import requires_provider, requires_device, requires_qe_access
 from ..ibm_test_case import IBMTestCase
 from ..contextmanagers import custom_qiskitrc, no_envs, CREDENTIAL_ENV_VARS
+
+API_URL = 'https://api.quantum-computing.ibm.com/api'
 
 
 class TestIBMProviderInitialization(IBMTestCase):
@@ -114,6 +117,34 @@ class TestIBMProviderInitialization(IBMTestCase):
         self.assertEqual(provider.credentials.hub, 'ibm-q')
         self.assertEqual(provider.credentials.group, 'open')
         self.assertEqual(provider.credentials.project, 'main')
+
+    def test_provider_init_non_auth_url(self):
+        """Test initializing provider with a non-auth URL."""
+        qe_token = 'invalid'
+        qe_url = API_URL
+
+        with self.assertRaises(IBMAccountCredentialsInvalidUrl) as context_manager:
+            IBMProvider(token=qe_token, url=qe_url)
+
+        self.assertIn('authentication URL', str(context_manager.exception))
+
+    def test_provider_init_non_auth_url_with_hub(self):
+        """Test initializing provider with a non-auth URL containing h/g/p."""
+        qe_token = 'invalid'
+        qe_url = API_URL + '/Hubs/X/Groups/Y/Projects/Z'
+
+        with self.assertRaises(IBMAccountCredentialsInvalidUrl) as context_manager:
+            IBMProvider(token=qe_token, url=qe_url)
+
+        self.assertIn('authentication URL', str(context_manager.exception))
+
+    def test_provider_init_no_credentials(self):
+        """Test initializing provider with no credentials."""
+        with self.assertRaises(IBMAccountCredentialsNotFound) as context_manager, \
+             no_envs(CREDENTIAL_ENV_VARS):
+            IBMProvider()
+
+        self.assertIn('No IBM Quantum credentials found.', str(context_manager.exception))
 
 
 class TestIBMProvider(IBMTestCase, providers.ProviderTestCase):
