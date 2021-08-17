@@ -271,7 +271,7 @@ def _get_credentials():
     if os.getenv('QISKIT_IBM_USE_STAGING_CREDENTIALS', ''):
         # Special case: instead of using the standard credentials mechanism,
         # load them from different environment variables. This assumes they
-        # will always be in place, as is used by the Travis setup.
+        # will always be in place, as is used by the CI setup.
         return Credentials(
             os.getenv('QISKIT_IBM_STAGING_API_TOKEN'), os.getenv('QISKIT_IBM_STAGING_API_URL')
         )
@@ -283,7 +283,7 @@ def _get_credentials():
         # Decide which credentials to use for testing.
         if len(discovered_credentials) > 1:
             try:
-                # Attempt to use QE credentials.
+                # Attempt to use IBM Quantum credentials.
                 return discovered_credentials[(None, None, None)]
             except KeyError:
                 pass

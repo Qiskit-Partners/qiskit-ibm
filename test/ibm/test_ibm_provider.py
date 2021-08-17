@@ -19,14 +19,59 @@ from qiskit.test import providers, slow_test
 from qiskit.compiler import transpile
 from qiskit.providers.exceptions import QiskitBackendNotFoundError
 from qiskit.providers.models.backendproperties import BackendProperties
+from qiskit_ibm import IBMAccount
 from qiskit_ibm.ibm_provider import IBMProvider
 from qiskit_ibm.ibm_backend import IBMSimulator, IBMBackend
 from qiskit_ibm.ibm_backend_service import IBMBackendService
 from qiskit_ibm.experiment import IBMExperimentService
 from qiskit_ibm.random.ibm_random_service import IBMRandomService
 
-from ..decorators import requires_provider, requires_device
+from ..decorators import requires_provider, requires_device, requires_qe_access
 from ..ibm_test_case import IBMTestCase
+from ..contextmanagers import custom_qiskitrc, no_envs, CREDENTIAL_ENV_VARS
+
+
+class TestIBMProviderInitialization(IBMTestCase):
+    """Tests for the IBMProvider class initialization."""
+
+    def setUp(self):
+        """Initial test setup."""
+        super().setUp()
+        self.account = IBMAccount()
+
+    @requires_qe_access
+    def test_provider_init_token(self, qe_token, qe_url):
+        """Test initializing a provider with only API token."""
+        provider = IBMProvider(token=qe_token, url=qe_url)
+        self.assertIsInstance(provider, IBMProvider)
+        self.assertEqual(provider.credentials.token, qe_token)
+        self.assertEqual(provider.credentials.hub, 'ibm-q')
+        self.assertEqual(provider.credentials.group, 'open')
+        self.assertEqual(provider.credentials.project, 'main')
+
+    @requires_qe_access
+    def test_provider_init_token_url_hgp(self, qe_token, qe_url):
+        """Test initializing a provider with API token, URL and Hub/Group/Project."""
+        provider = IBMProvider(
+            token=qe_token, url=qe_url, hub='ibm-q', group='open', project='main')
+        self.assertIsInstance(provider, IBMProvider)
+        self.assertEqual(provider.credentials.token, qe_token)
+        self.assertEqual(provider.credentials.hub, 'ibm-q')
+        self.assertEqual(provider.credentials.group, 'open')
+        self.assertEqual(provider.credentials.project, 'main')
+
+    @requires_qe_access
+    def test_provider_init_saved_account(self, qe_token, qe_url):
+        """Test loading an account."""
+        with custom_qiskitrc(), no_envs(CREDENTIAL_ENV_VARS):
+            self.account.save_account(qe_token, url=qe_url)
+            provider = IBMProvider()
+
+        self.assertIsInstance(provider, IBMProvider)
+        self.assertEqual(provider.credentials.token, qe_token)
+        self.assertEqual(provider.credentials.hub, 'ibm-q')
+        self.assertEqual(provider.credentials.group, 'open')
+        self.assertEqual(provider.credentials.project, 'main')
 
 
 class TestIBMProvider(IBMTestCase, providers.ProviderTestCase):

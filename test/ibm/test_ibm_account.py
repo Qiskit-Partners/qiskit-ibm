@@ -302,7 +302,7 @@ class TestIBMAccountAccounts(IBMTestCase):
                               str(context_manager.exception))
 
 
-class TestIBMIBMProvider(IBMTestCase):
+class TestIBMAccountProvider(IBMTestCase):
     """Tests for IBMAccount provider related methods."""
 
     @requires_qe_access
