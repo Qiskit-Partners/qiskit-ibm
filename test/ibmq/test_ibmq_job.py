@@ -56,6 +56,11 @@ class TestIBMQJob(IBMQTestCase):
         cls.sim_backend = provider.get_backend('ibmq_qasm_simulator')
         cls.bell = transpile(ReferenceCircuits.bell(), cls.sim_backend)
         cls.sim_job = cls.sim_backend.run(cls.bell)
+        # Create test data, if necessary for bulk testing.
+        if len(provider.backend.jobs(backend_name=cls.sim_backend.name(), limit=10)) < 10:
+            for _ in range(10):
+                job = cls.sim_backend.run(cls.bell)
+                job.wait_for_final_state()
         cls.last_month = datetime.now() - timedelta(days=30)
 
     @slow_test
@@ -362,22 +367,23 @@ class TestIBMQJob(IBMQTestCase):
 
     def test_retrieve_jobs_end_datetime(self):
         """Test retrieving jobs created before a specified datetime."""
-        past_month = datetime.now() - timedelta(days=30)
+        today = datetime.now()
         # Add local tz in order to compare to `creation_date` which is tz aware.
-        past_month_tz_aware = past_month.replace(tzinfo=tz.tzlocal())
+        today_tz_aware = today.replace(tzinfo=tz.tzlocal())
 
         job_list = self.provider.backend.jobs(backend_name=self.sim_backend.name(),
-                                              limit=2, end_datetime=past_month)
+                                              limit=2, end_datetime=today)
         self.assertTrue(job_list)
         for job in job_list:
-            self.assertLessEqual(job.creation_date(), past_month_tz_aware,
+            self.assertLessEqual(job.creation_date(), today_tz_aware,
                                  'job {} creation date {} not within range'
                                  .format(job.job_id(), job.creation_date()))
 
     def test_retrieve_jobs_between_datetimes(self):
         """Test retrieving jobs created between two specified datetimes."""
+
+        # Get date endpoints
         date_today = datetime.now()
-        past_month = date_today - timedelta(30)
         past_two_month = date_today - timedelta(60)
 
         # Used for `db_filter`, should not override `start_datetime` and `end_datetime` arguments.
@@ -385,18 +391,23 @@ class TestIBMQJob(IBMQTestCase):
         db_filters = [None, {'creationDate': {'gt': past_ten_days}}]
 
         # Add local tz in order to compare to `creation_date` which is tz aware.
-        past_month_tz_aware = past_month.replace(tzinfo=tz.tzlocal())
+        date_today_tz_aware = date_today.replace(tzinfo=tz.tzlocal())
         past_two_month_tz_aware = past_two_month.replace(tzinfo=tz.tzlocal())
 
         for db_filter in db_filters:
             with self.subTest(db_filter=db_filter):
+
                 job_list = self.provider.backend.jobs(
                     backend_name=self.sim_backend.name(), limit=2,
-                    start_datetime=past_two_month, end_datetime=past_month, db_filter=db_filter)
+                    start_datetime=past_two_month, end_datetime=date_today, db_filter=db_filter)
+
+                # Check the job list is non-empty
                 self.assertTrue(job_list)
+
+                # Check the datetimes align with datetime interval
                 for job in job_list:
                     self.assertTrue(
-                        (past_two_month_tz_aware <= job.creation_date() <= past_month_tz_aware),
+                        (past_two_month_tz_aware <= job.creation_date() <= date_today_tz_aware),
                         'job {} creation date {} not within range'.format(
                             job.job_id(), job.creation_date()))
 
