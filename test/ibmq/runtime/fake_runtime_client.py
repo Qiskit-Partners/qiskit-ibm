@@ -12,14 +12,21 @@
 
 """Fake RuntimeClient."""
 
+from unittest.mock import MagicMock
+from typing import Dict
 import time
 import uuid
 import json
 from concurrent.futures import ThreadPoolExecutor
 
+from qiskit.test.mock.fake_qasm_simulator import FakeQasmSimulator
+from qiskit.tools.events.pubsub import Publisher
+
 from qiskit_ibm.credentials import Credentials
 from qiskit_ibm.api.exceptions import RequestsApiError
 from qiskit_ibm.runtime.utils import RuntimeEncoder
+from qiskit_ibm.runtime.runtime_job import RuntimeJob
+from qiskit_ibm.api.clients.runtime import RuntimeClient
 
 
 class BaseFakeProgram:
@@ -74,8 +81,17 @@ class BaseFakeRuntimeJob:
 
     _executor = ThreadPoolExecutor()  # pylint: disable=bad-option-value,consider-using-with
 
-    def __init__(self, job_id, program_id, hub, group, project, backend_name, final_status,
-                 params):
+    def __init__(self,
+                 job_id: str,
+                 program_id: str,
+                 hub: str,
+                 group: str,
+                 project: str,
+                 backend_name: str,
+                 api_client: RuntimeClient,
+                 credentials: Credentials,
+                 final_status: str,
+                 params: str) -> None:
         """Initialize a fake job."""
         self._job_id = job_id
         self._status = final_status or "QUEUED"
@@ -84,7 +100,9 @@ class BaseFakeRuntimeJob:
         self._group = group
         self._project = project
         self._backend_name = backend_name
+        self._api_client = api_client
         self._params = params
+        self.credentials = credentials
         if final_status is None:
             self._future = self._executor.submit(self._auto_progress)
             self._result = None
@@ -92,16 +110,16 @@ class BaseFakeRuntimeJob:
             self._result = json.dumps("foo")
         self._final_status = final_status
 
-    def _auto_progress(self):
+    def _auto_progress(self) -> None:
         """Automatically update job status."""
         for status in self._job_progress:
-            time.sleep(0.5)
+            time.sleep(2)
             self._status = status
 
         if self._status == "COMPLETED":
             self._result = json.dumps("foo")
 
-    def to_dict(self):
+    def to_dict(self) -> Dict:
         """Convert to dictionary format."""
         return {'id': self._job_id,
                 'hub': self._hub,
@@ -112,9 +130,26 @@ class BaseFakeRuntimeJob:
                 'params': [self._params],
                 'program': {'id': self._program_id}}
 
-    def result(self):
+    def result(self) -> str:
         """Return job result."""
         return self._result
+
+    def cancel(self) -> None:
+        """Stand-in functionality for cancelling a job"""
+        pass
+
+    def job(self) -> RuntimeJob:
+        """Get the RuntimeJob instance that this object
+
+        Returns:
+            RuntimeJob: the job instance
+        mocks"""
+        return RuntimeJob(backend=FakeQasmSimulator(),
+                          api_client=self._api_client,
+                          credentials=self.credentials,
+                          job_id=self._job_id,
+                          program_id=self._program_id,
+                          user_callback=None)
 
 
 class FailedRuntimeJob(BaseFakeRuntimeJob):
@@ -126,7 +161,7 @@ class FailedRuntimeJob(BaseFakeRuntimeJob):
         "FAILED"
     ]
 
-    def _auto_progress(self):
+    def _auto_progress(self) -> None:
         """Automatically update job status."""
         super()._auto_progress()
 
@@ -169,7 +204,7 @@ class CancelableRuntimeJob(BaseFakeRuntimeJob):
         self._future.cancel()
         self._cancelled = True
 
-    def to_dict(self):
+    def to_dict(self) -> Dict:
         """Convert to dictionary format."""
         data = super().to_dict()
         if self._cancelled:
@@ -182,7 +217,7 @@ class CustomResultRuntimeJob(BaseFakeRuntimeJob):
 
     custom_result = "bar"
 
-    def _auto_progress(self):
+    def _auto_progress(self) -> None:
         """Automatically update job status."""
         super()._auto_progress()
 
@@ -197,7 +232,7 @@ class TimedRuntimeJob(BaseFakeRuntimeJob):
         self._runtime = kwargs.pop('run_time')
         super().__init__(**kwargs)
 
-    def _auto_progress(self):
+    def _auto_progress(self) -> None:
         self._status = "RUNNING"
         time.sleep(self._runtime)
         self._status = "COMPLETED"
@@ -206,11 +241,12 @@ class TimedRuntimeJob(BaseFakeRuntimeJob):
             self._result = json.dumps("foo")
 
 
-class BaseFakeRuntimeClient:
+class BaseFakeRuntimeClient(RuntimeClient):
     """Base class for faking the runtime client."""
 
     def __init__(self, job_classes=None, final_status=None, job_kwargs=None):
         """Initialize a fake runtime client."""
+        super().__init__(MagicMock())
         self._programs = {}
         self._jobs = {}
         self._job_classes = job_classes or []
@@ -227,13 +263,14 @@ class BaseFakeRuntimeClient:
         """Set job status to passed in final status instantly."""
         self._final_status = final_status
 
-    def list_programs(self):
+    def list_programs(self) -> list:
         """List all progrmas."""
         programs = []
         for prog in self._programs.values():
             programs.append(prog.to_dict())
         return programs
 
+    # pylint:disable=arguments-differ
     def program_create(self, program_data, name, description, max_execution_time, version="1.0",
                        backend_requirements=None, parameters=None, return_values=None,
                        interim_results=None, is_public=False):
@@ -251,13 +288,13 @@ class BaseFakeRuntimeClient:
             is_public=is_public)
         return {'id': program_id}
 
-    def program_get(self, program_id: str):
+    def program_get(self, program_id: str) -> Dict:
         """Return a specific program."""
         if program_id not in self._programs:
             raise RequestsApiError("Program not found", status_code=404)
         return self._programs[program_id].to_dict()
 
-    def program_get_data(self, program_id: str):
+    def program_get_data(self, program_id: str) -> Dict:
         """Return a specific program and its data."""
         return self._programs[program_id].to_dict(iclude_data=True)
 
@@ -267,15 +304,18 @@ class BaseFakeRuntimeClient:
             credentials: Credentials,
             backend_name: str,
             params: str
-    ):
+    ) -> Dict:
         """Run the specified program."""
         job_id = uuid.uuid4().hex
         job_cls = self._job_classes.pop(0) if len(self._job_classes) > 0 else BaseFakeRuntimeJob
         job = job_cls(job_id=job_id, program_id=program_id,
                       hub=credentials.hub, group=credentials.group,
                       project=credentials.project, backend_name=backend_name,
-                      params=params, final_status=self._final_status, **self._job_kwargs)
+                      api_client=self, credentials=credentials, params=params,
+                      final_status=self._final_status, **self._job_kwargs)
         self._jobs[job_id] = job
+        # Publish the job for UI update
+        Publisher().publish("ibmq.runtimejob.start", job.job())
         return {'id': job_id}
 
     def program_delete(self, program_id: str) -> None:
@@ -284,7 +324,7 @@ class BaseFakeRuntimeClient:
             raise RequestsApiError("Program not found", status_code=404)
         del self._programs[program_id]
 
-    def job_get(self, job_id):
+    def job_get(self, job_id: str) -> Dict:
         """Get the specific job."""
         return self._get_job(job_id).to_dict()
 
@@ -325,8 +365,8 @@ class BaseFakeRuntimeClient:
         self._get_job(job_id)
         del self._jobs[job_id]
 
-    def _get_job(self, job_id):
+    def _get_job(self, job_id: str):
         """Get job."""
-        if job_id not in self._jobs:
+        if self._jobs.get(job_id) is None:
             raise RequestsApiError("Job not found", status_code=404)
         return self._jobs[job_id]

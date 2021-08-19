@@ -17,6 +17,7 @@ from typing import Dict, Callable, Optional, Union, List, Any, Type
 import json
 import copy
 
+from qiskit.tools.events.pubsub import Publisher
 from qiskit.providers.exceptions import QiskitBackendNotFoundError
 from qiskit_ibm import accountprovider  # pylint: disable=unused-import
 
@@ -246,6 +247,9 @@ class IBMRuntimeService:
                          job_id=response['id'], program_id=program_id, params=inputs,
                          user_callback=callback,
                          result_decoder=result_decoder)
+
+        # Publish the job for UI update
+        Publisher().publish("ibmq.runtimejob.start", job)
         return job
 
     def upload_program(

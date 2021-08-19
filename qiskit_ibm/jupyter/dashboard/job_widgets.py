@@ -12,15 +12,39 @@
 
 """A module of widgets for job tracking."""
 
-from typing import Optional
-from datetime import datetime
-
+from typing import List
 import ipywidgets as widgets
 
-from qiskit_ibm.job.ibmqjob import IBMQJob
+from qiskit.providers.job import JobV1
+from .utils import JobType, get_job_type
+from .constants import LIST_COL_DIV, LIST_STYLE_WIDGET, DASH_JOB_HTML, \
+    DASH_RT_JOB_HTML, CIRC_JOB_LABELS, RT_JOB_LABELS
 
 
-def make_clear_button(watcher: 'IQXDashboard') -> widgets.GridBox:
+# Represents an updated widget's HTML string
+# pylint: disable=dangerous-default-value
+def updated_widget_str(job_type: JobType,
+                       fields: List[str] = [],
+                       colors: List[str] = ['black'] * 4) -> str:
+    """ Returns the job item's HTML, with the provided color injected into the status field
+
+    Args:
+        job_type: the job's type
+        fields: the field values to go into the widget html template
+        colors: the colors to style the fields' text with
+
+    Returns:
+        str: the widget's HTML string
+    """
+    html = DASH_RT_JOB_HTML if job_type == JobType.Runtime else DASH_JOB_HTML
+    return html.format(
+        *fields,
+        *colors,
+        div=LIST_COL_DIV
+    )
+
+
+def make_clear_button(watcher: 'JobUI') -> widgets.GridBox:
     """Makes the clear button.
 
     Args:
@@ -31,10 +55,11 @@ def make_clear_button(watcher: 'IQXDashboard') -> widgets.GridBox:
     """
     clear = widgets.Button(
         description='Clear',
-        button_style='primary',
         layout=widgets.Layout(width='70px',
                               grid_area='right',
                               padding="0px 0px 0px 0px"))
+
+    clear.style.button_color = '#e5d1ff'
 
     def on_clear_button_clicked(_):
         """Clear finished jobs."""
@@ -52,75 +77,113 @@ def make_clear_button(watcher: 'IQXDashboard') -> widgets.GridBox:
     return clear_button
 
 
-def make_labels() -> widgets.HBox:
+def make_labels(job_type: JobType) -> widgets.HBox:
     """Makes the labels widget.
 
     Returns:
         The labels widget.
     """
-    labels0 = widgets.HTML(value="<h5>Job ID</h5>",
-                           layout=widgets.Layout(width='190px'))
-    labels1 = widgets.HTML(value='<h5>Backend</h5>',
-                           layout=widgets.Layout(width='165px'))
-    labels2 = widgets.HTML(value='<h5>Status</h5>',
-                           layout=widgets.Layout(width='125px'))
-    labels3 = widgets.HTML(value='<h5>Est. Start Time</h5>',
-                           layout=widgets.Layout(width='100px'))
 
-    labels = widgets.HBox(children=[labels0, labels1, labels2, labels3],
-                          layout=widgets.Layout(width='700px',
+    labels = CIRC_JOB_LABELS if job_type == JobType.Circuit else RT_JOB_LABELS
+
+    children = [widgets.HTML(value='<h5>%s</h5>' % label,
+                             layout=widgets.Layout(width='%dpx' % width))
+                for (label, width) in labels]
+
+    width = sum(width for _, width in labels)
+
+    labels = widgets.HBox(children=children,
+                          layout=widgets.Layout(width='%dpx' % (width + 50),
                                                 margin='0px 0px 0px 35px'))
     return labels
 
 
-def create_job_widget(watcher: 'IQXDashboard',
-                      job: IBMQJob,
-                      backend: str,
-                      status: str = '',
-                      queue_pos: Optional[int] = None,
-                      est_start_time: Optional[datetime] = None) -> widgets.HBox:
+def make_rt_labels() -> widgets.HBox:
+    """Makes the labels widget.
+
+    Returns:
+        The labels widget.
+    """
+
+    labels0 = widgets.HTML(value="<h5>Job ID</h5>",
+                           layout=widgets.Layout(width='200px'))
+    labels1 = widgets.HTML(value="<h5>Backend</h5>",
+                           layout=widgets.Layout(width='125px'))
+    labels2 = widgets.HTML(value='<h5>Program Name</h5>',
+                           layout=widgets.Layout(width='175px'))
+    labels3 = widgets.HTML(value='<h5>Status</h5>',
+                           layout=widgets.Layout(width='100px'))
+    labels4 = widgets.HTML(value='<h5>Created at</h5>',
+                           layout=widgets.Layout(width='100px'))
+
+    labels = widgets.HBox(children=[labels0, labels1, labels2, labels3, labels4],
+                          layout=widgets.Layout(width='750px',
+                                                margin='0px 0px 0px 35px'))
+    return labels
+
+
+def create_job_widget(watcher: 'JobUI',
+                      job: JobV1,
+                      **kwargs) -> widgets.HBox:
     """Create a widget corresponding to a particular job instance.
 
     Args:
         watcher: The job watcher instance.
         job: The job.
-        backend: Name of the backend the job is running on.
-        status: The job status.
-        queue_pos: Queue position, if any.
-        est_start_time: Estimated start time, if any.
+        kwargs: additional information for IBMQJob. Consists of:
+            queue_pos: Queue position
+            est_start_time: Estimated start time
 
     Returns:
         The job widget.
     """
+    # Get the job info
     job_id = job.job_id()
+    status = job.status().name
+    job_type = get_job_type(job)
+    backend = job.backend().name()
 
-    id_label = widgets.HTML(value="{}".format(job_id),
-                            layout=widgets.Layout(width='190px'))
-    backend_label = widgets.HTML(value="{}".format(backend),
-                                 layout=widgets.Layout(width='165px'))
+    # Generate the fields to be displayed
 
-    queue_str = ' ({})'.format(queue_pos) if status == 'QUEUED' and queue_pos else ''
-    status_label = widgets.HTML(value="{}{}".format(status, queue_str),
-                                layout=widgets.Layout(width='125px'))
+    if job_type == JobType.Circuit:
 
-    est_time = est_start_time.strftime("%H:%M %Z (%m/%d)") if est_start_time else '-'
-    est_time_label = widgets.HTML(value="{}".format(est_time),
-                                  layout=widgets.Layout(width='125px'))
+        queue_pos = kwargs.get('queue_pos')
+        est_start_time = kwargs.get('est_start_time')
 
+        queue_str = ' ({})'.format(queue_pos) if status == 'QUEUED' and queue_pos else ''
+        est_time = est_start_time.strftime("%H:%M %Z (%m/%d)") if est_start_time else '-'
+
+        fields = [job_id, backend, "{}{}".format(status, queue_str), est_time]
+
+    else:
+
+        program_name = kwargs.get('program_name')
+        created_at = job.creation_date.strftime("%m/%d/%y, %H:%M") if job.creation_date else ''
+
+        fields = [job_id, backend, program_name, status, created_at]
+
+    # Put the fields into an HTML string
+    labels_str = updated_widget_str(job_type, fields, ['black'] * len(fields))
+    # Generate HTML widgets
+    labels = widgets.HTML(value=labels_str)
+    styles = widgets.HTML(value=LIST_STYLE_WIDGET)
+
+    # Create a close button to cancel the job
     close_button = widgets.Button(button_style='', icon='close',
                                   layout=widgets.Layout(width='30px',
-                                                        margin="0px 5px 0px 0px"))
-    close_button.style.button_color = 'white'
+                                                        margin="10px 5px 0px 0px"))
+    close_button.style.button_color = '#e5d1ff'
 
     def cancel_on_click(_):
         """Cancel the job."""
         watcher.cancel_job(job_id)
     close_button.on_click(cancel_on_click)
 
-    job_grid = widgets.HBox(children=[close_button, id_label, backend_label,
-                                      status_label, est_time_label],
-                            layout=widgets.Layout(min_width='690px',
-                                                  max_width='690px'))
+    # Generate the widget grid with the button and HTML table widgets
+    job_grid = widgets.HBox(children=list([close_button, labels, styles]),
+                            layout=widgets.Layout(min_width='700px',
+                                                  max_width='700px'))
     job_grid.job_id = job_id
     job_grid.job = job
+    job_grid.status = status
     return job_grid

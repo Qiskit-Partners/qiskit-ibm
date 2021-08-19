@@ -24,3 +24,51 @@ RESERVATION_STR = STAT_FONT_VALUE.format("in {start_dt} ({duration}m)")
 reservation starts. ``duration`` is reservation duration."""
 RESERVATION_NONE = STAT_FONT_VALUE.format('-')
 """String used when there is no reservation."""
+
+EXP_JOB_STATUS_LIST = ['DONE', 'ERROR', 'CANCELLED']
+""" Expired jobs status list """
+EXP_JOB_STATUS_COLORS_LIST = ['#34BC6E', '#DC267F', '#FFB000']
+""" Colors associated with expired job statuses """
+
+LIST_STYLE_WIDGET = """
+<style>
+    .row_item {
+        display: flex;
+        z-index: 999;
+        box-shadow: 5px 5px 5px -3px black;
+        opacity: 0.95;
+        float: left;
+        letter-spacing: 1px;
+        padding: 3px;
+    }
+
+    .row_item p {
+        padding: 2px 0px 2px 7px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+</style>"""
+"""tabular list styling for the dashboard"""
+LIST_COL_DIV = "<div style='background-color: lightgrey; width: 2px'></div>"
+""" separator element (div) in a dashboard table row """
+DASH_JOB_HTML = """<div class='row_item'>
+        <p style='width: 175px; color: {4};'>{0}</p>{div}
+        <p style='width: 150px; color: {5};'>{1}</p>{div}
+        <p style='width: 150px; color: {6};'>{2}</p>{div}
+        <p style='width: 175px; color: {7};'>{3}</p>
+    </div>"""
+DASH_RT_JOB_HTML = """<div class='row_item'>
+        <p style='width: 150px; color: {5};'>{0}</p>{div}
+        <p style='width: 150px; color: {6};'>{1}</p>{div}
+        <p style='width: 150px; color: {7};'>{2}</p>{div}
+        <p style='width: 75px; color: {8};'>{3}</p>{div}
+        <p style='width: 125px; color: {9};'>{4}</p>
+    </div>"""
+
+CIRC_JOB_LABELS = [('Job ID', 175), ('Backend', 150), ('Status', 150), ('Est. Start Time', 175)]
+""" The labels and widths for the circuit jobs dashboard rows"""
+RT_JOB_LABELS = [('Job ID', 150), ('Backend', 150), ('Program Name', 150),
+                 ('Status', 75), ('Created At', 125)]
+""" The labels and widths for the runtime jobs dashboard rows"""

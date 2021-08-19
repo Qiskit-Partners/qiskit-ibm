@@ -13,6 +13,31 @@
 """Utility functions for the IBM Quantum Experience dashboard."""
 
 from collections import namedtuple
+from enum import Enum
+
+from qiskit.providers.job import JobV1 as Job
+from qiskit_ibm.runtime.runtime_job import RuntimeJob
+
+
+class JobType(Enum):
+    """The type of an executed job"""
+    Circuit = 1
+    Runtime = 2
+
+
+def get_job_type(job: Job) -> JobType:
+    """Get job type (JobType) for the Job object
+
+    Args:
+        job: the Job object
+
+    Returns:
+        JobType: the job type
+
+    """
+    # pylint: disable=unidiomatic-typecheck
+    return JobType.Runtime if type(job) == RuntimeJob else JobType.Circuit
+
 
 BackendWithProviders = namedtuple('BackendWithProviders', ['backend', 'providers'])
 """Named tuple used to pass a backend and its providers."""
