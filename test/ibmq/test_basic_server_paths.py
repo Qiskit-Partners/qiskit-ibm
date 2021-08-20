@@ -56,6 +56,9 @@ class TestBasicServerPaths(IBMQTestCase):
                 qobj_downloaded = backend.retrieve_job(job.job_id()).qobj()
                 self.assertEqual(qobj_downloaded.to_dict(), job.qobj().to_dict())
 
+                # Cancel the job
+                cancel_job(job)
+
     def test_job_backend_properties_and_status(self):
         """Test the backend properties and status of a job."""
         for desc, provider in self.providers.items():
@@ -67,7 +70,7 @@ class TestBasicServerPaths(IBMQTestCase):
                 self.assertIsNotNone(job.properties())
                 self.assertTrue(job.status())
                 # Cancel job so it doesn't consume more resources.
-                cancel_job(job, verify=True)
+                cancel_job(job)
 
     def test_retrieve_jobs(self):
         """Test retrieving jobs."""
@@ -83,6 +86,8 @@ class TestBasicServerPaths(IBMQTestCase):
                 self.assertGreaterEqual(len(retrieved_jobs), 1)
                 retrieved_job_ids = {job.job_id() for job in retrieved_jobs}
                 self.assertIn(job_id, retrieved_job_ids)
+                # Cancel job so it doesn't consume more resources.
+                cancel_job(job)
 
     def test_device_properties_and_defaults(self):
         """Test the properties and defaults for an open pulse device."""
@@ -114,8 +119,7 @@ class TestBasicServerPaths(IBMQTestCase):
         transpiled = transpile(circs, backend)
         for _ in range(max_retry):
             try:
-                job = backend.run(transpiled)
-                return job
+                return backend.run(transpiled)
             except IBMQBackendJobLimitError as err:
                 limit_error = err
                 time.sleep(1)

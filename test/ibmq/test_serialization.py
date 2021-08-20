@@ -26,7 +26,6 @@ from qiskit_ibm import least_busy
 from qiskit_ibm.utils.json_encoder import IQXJsonEncoder
 
 from ..decorators import requires_provider
-from ..utils import cancel_job
 from ..ibmqtestcase import IBMQTestCase
 
 
@@ -71,8 +70,6 @@ class TestSerialization(IBMQTestCase):
         # Convert numpy arrays to lists since they now get converted right
         # before being sent to the server.
         self.assertEqual(_array_to_list(job.qobj().to_dict()), rqobj.to_dict())
-
-        cancel_job(job)
 
     def test_backend_configuration(self):
         """Test deserializing backend configuration."""

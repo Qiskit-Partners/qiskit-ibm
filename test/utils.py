@@ -15,19 +15,23 @@
 import os
 import time
 import logging
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from qiskit import QuantumCircuit
 from qiskit.qobj import QasmQobj
 from qiskit.compiler import assemble, transpile
 from qiskit.test.reference_circuits import ReferenceCircuits
 from qiskit.pulse import Schedule
+from qiskit.providers.backend import Backend
 from qiskit.providers.exceptions import JobError
 from qiskit.providers.jobstatus import JobStatus
 from qiskit_ibm.ibmqfactory import IBMQFactory
+from qiskit_ibm.exceptions import IBMQBackendJobLimitError
 from qiskit_ibm.accountprovider import AccountProvider
 from qiskit_ibm.ibmqbackend import IBMQBackend
 from qiskit_ibm.job import IBMQJob
+
+UTILS_LOGGER = logging.getLogger(__name__)
 
 
 def setup_test_logging(logger: logging.Logger, filename: str):
@@ -260,3 +264,38 @@ def update_job_tags_and_verify(
         'Updating the tags for job {} was unsuccessful. '
         'The tags are {}, but they should be {}.'
         .format(job_to_update.job_id(), job_to_update.tags(), tags_after_update))
+
+
+class JobExecutor:
+    """Abstraction for running circuit jobs in test suites."""
+
+    def __init__(self, backend: Backend) -> None:
+        self.bell = transpile(ReferenceCircuits.bell(), backend)
+        self.backend = backend
+
+    def run_job(self, backend: Backend = None, max_retries: int = 10,
+                qc: Union[QuantumCircuit, List[QuantumCircuit]] = None, **kwargs) -> IBMQJob:
+        """Runs a circuit job.
+
+        Args:
+            backend: the backend
+            max_retries: the max number of attempts at submitting the job, if submission fails.
+            qc: the circuit
+            kwargs: additional params to `backend.run(..)`
+
+        Returns:
+            the job
+        """
+        # Default to the bell circuit
+        qc = qc or self.bell
+        backend = backend or self.backend
+        # Run circuit
+        while max_retries >= 0:
+            try:
+                return backend.run(qc, **kwargs)
+            except IBMQBackendJobLimitError:
+                UTILS_LOGGER.info(
+                    'Cannot submit job, trying again.. %d attempts remaining.', max_retries)
+            time.sleep(5)
+            max_retries -= 1
+        return None

@@ -12,22 +12,22 @@
 
 """Test for the Websocket client integration."""
 
-from unittest import mock
-from threading import Thread
 from queue import Queue
+from threading import Thread
+from unittest import mock
 
 from qiskit import transpile
-from qiskit.test.reference_circuits import ReferenceCircuits
-from qiskit.test import slow_test
-from qiskit.providers import JobTimeoutError
 from qiskit.providers.jobstatus import JobStatus
-
+from qiskit.test import slow_test
+from qiskit.test.reference_circuits import ReferenceCircuits
 from qiskit_ibm.api.clients import AccountClient, websocket
+from qiskit_ibm.ibmqbackend import IBMQBackend
+from qiskit_ibm.job.exceptions import JobTimeoutError
 
+from ...decorators import requires_device, requires_provider
 from ...ibmqtestcase import IBMQTestCase
-from ...decorators import requires_provider, requires_device
-from ...utils import most_busy_backend, cancel_job
 from ...proxy_server import MockProxyServer, use_proxies
+from ...utils import most_busy_backend, JobExecutor
 
 
 class TestWebsocketIntegration(IBMQTestCase):
@@ -40,8 +40,10 @@ class TestWebsocketIntegration(IBMQTestCase):
         # pylint: disable=arguments-differ
         super().setUpClass()
         cls.provider = provider
-        cls.sim_backend = provider.get_backend('ibmq_qasm_simulator')
+        cls.sim_backend: IBMQBackend = provider.get_backend('ibmq_qasm_simulator')
         cls.bell = transpile(ReferenceCircuits.bell(), cls.sim_backend)
+        cls.executor = JobExecutor(cls.sim_backend)
+        cls.run_job = cls.executor.run_job
 
     def setUp(self):
         """Initial test setup."""
@@ -60,7 +62,7 @@ class TestWebsocketIntegration(IBMQTestCase):
 
     def test_websockets_simulator(self):
         """Test checking status of a job via websockets for a simulator."""
-        job = self.sim_backend.run(self.bell, shots=1)
+        job = self.run_job(shots=1)
 
         # Manually disable the non-websocket polling.
         job._api_client._job_final_status_polling = self._job_final_status_polling
@@ -72,7 +74,7 @@ class TestWebsocketIntegration(IBMQTestCase):
     @requires_device
     def test_websockets_device(self, backend):
         """Test checking status of a job via websockets for a device."""
-        job = backend.run(transpile(ReferenceCircuits.bell(), backend), shots=1)
+        job = self.run_job(backend=backend, shots=1)
 
         # Manually disable the non-websocket polling.
         job._api_client._job_final_status_polling = self._job_final_status_polling
@@ -83,9 +85,7 @@ class TestWebsocketIntegration(IBMQTestCase):
 
     def test_websockets_job_final_state(self):
         """Test checking status of a job in a final state via websockets."""
-        job = self.sim_backend.run(self.bell)
-
-        job._wait_for_completion()
+        job = self.run_job()
 
         # Manually disable the non-websocket polling.
         job._api_client._job_final_status_polling = self._job_final_status_polling
@@ -98,8 +98,7 @@ class TestWebsocketIntegration(IBMQTestCase):
 
     def test_websockets_retry_bad_url(self):
         """Test http retry after websocket error due to an invalid URL."""
-
-        job = self.sim_backend.run(self.bell)
+        job = self.run_job()
         saved_websocket_url = job._api_client._credentials.websockets_url
 
         try:
@@ -116,12 +115,11 @@ class TestWebsocketIntegration(IBMQTestCase):
 
     def test_websockets_retry_bad_auth(self):
         """Test http retry after websocket error due to a failed authentication."""
-        job = self.sim_backend.run(self.bell)
-
+        job = self.run_job()
         with mock.patch.object(websocket.WebsocketAuthenticationMessage, 'as_json',
                                return_value='foo'), \
-             mock.patch.object(AccountClient, 'job_status',
-                               side_effect=job._api_client.job_status) as mocked_wait:
+            mock.patch.object(AccountClient, 'job_status',
+                              side_effect=job._api_client.job_status) as mocked_wait:
             job._wait_for_completion()
             self.assertIs(job._status, JobStatus.DONE)
             mocked_wait.assert_called_with(job.job_id())
@@ -135,8 +133,7 @@ class TestWebsocketIntegration(IBMQTestCase):
             job._job_id = saved_job_id
             return saved_job_status(saved_job_id)
 
-        job = self.sim_backend.run(self.bell)
-
+        job = self.run_job()
         # Save the originals.
         saved_job_id = job._job_id
         saved_job_status = job._api_client.job_status
@@ -154,21 +151,17 @@ class TestWebsocketIntegration(IBMQTestCase):
     def test_websockets_timeout(self):
         """Test timeout checking status of a job via websockets."""
         backend = most_busy_backend(self.provider)
-        job = backend.run(transpile(ReferenceCircuits.bell(), backend),
-                          shots=backend.configuration().max_shots)
+        job = self.run_job(shots=backend.configuration().max_shots)
 
-        try:
-            with self.assertRaises(JobTimeoutError):
-                job.result(timeout=0.1)
-        finally:
-            cancel_job(job)
+        with self.assertRaises(JobTimeoutError):
+            job.result(timeout=0.1)
 
     def test_websockets_multi_job(self):
         """Test checking status of multiple jobs in parallel via websockets."""
 
         def _run_job_get_result(q):
             """Run a job and get its result."""
-            job = self.sim_backend.run(self.bell)
+            job = self.run_job()
             # Manually disable the non-websocket polling.
             job._api_client._job_final_status_polling = self._job_final_status_polling
             job._wait_for_completion()
@@ -196,7 +189,7 @@ class TestWebsocketIntegration(IBMQTestCase):
     def test_websocket_proxy(self):
         """Test connecting to websocket via a proxy."""
         MockProxyServer(self, self.log).start()
-        job = self.sim_backend.run(self.bell, shots=1)
+        job = self.run_job(shots=1)
 
         # Manually disable the non-websocket polling.
         job._api_client._job_final_status_polling = self._job_final_status_polling

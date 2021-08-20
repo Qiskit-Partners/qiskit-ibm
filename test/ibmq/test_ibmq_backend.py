@@ -140,8 +140,7 @@ class TestIBMQBackend(IBMQTestCase):
         """Test running a Qobj."""
         qobj = assemble(transpile(ReferenceCircuits.bell(), self.backend), self.backend)
         with self.assertWarns(DeprecationWarning):
-            job = self.backend.run(qobj)
-        cancel_job(job)
+            self.backend.run(qobj)
 
     def test_backend_options(self):
         """Test backend options."""

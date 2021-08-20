@@ -14,52 +14,51 @@
 
 import json
 import os
-from io import StringIO
-from unittest.mock import patch
-from unittest import mock, skipIf
-import uuid
-import time
 import random
 import subprocess
 import tempfile
+import time
+import uuid
 import warnings
 from datetime import datetime
+from io import StringIO
+from unittest import mock, skipIf
+from unittest.mock import patch
+
 import numpy as np
 import scipy.sparse
-
-from qiskit.algorithms.optimizers import (
-    ADAM,
-    GSLS,
-    IMFIL,
-    SPSA,
-    SNOBFIT,
-    L_BFGS_B,
-    NELDER_MEAD,
-)
-from qiskit.result import Result
+from qiskit.algorithms.optimizers import (ADAM, GSLS, IMFIL, L_BFGS_B,
+                                          NELDER_MEAD, SNOBFIT, SPSA)
 from qiskit.circuit import Parameter, QuantumCircuit
-from qiskit.test.reference_circuits import ReferenceCircuits
 from qiskit.circuit.library import EfficientSU2
-from qiskit.opflow import (PauliSumOp, MatrixOp, PauliOp, CircuitOp, EvolvedOp,
-                           TaperedPauliSumOp, Z2Symmetries, I, X, Y, Z,
-                           StateFn, CircuitStateFn, DictStateFn, VectorStateFn, OperatorStateFn,
-                           SparseVectorStateFn, CVaRMeasurement, ComposedOp, SummedOp, TensoredOp)
-from qiskit.quantum_info import SparsePauliOp, Pauli, PauliTable, Statevector
+from qiskit.opflow import (CircuitOp, CircuitStateFn, ComposedOp,
+                           CVaRMeasurement, DictStateFn, EvolvedOp, I,
+                           MatrixOp, OperatorStateFn, PauliOp, PauliSumOp,
+                           SparseVectorStateFn, StateFn, SummedOp,
+                           TaperedPauliSumOp, TensoredOp, VectorStateFn, X, Y,
+                           Z, Z2Symmetries)
 from qiskit.providers.jobstatus import JobStatus
-
-from qiskit_ibm.exceptions import IBMQInputValueError
+from qiskit.quantum_info import Pauli, PauliTable, SparsePauliOp, Statevector
+from qiskit.result import Result
+from qiskit.test.reference_circuits import ReferenceCircuits
 from qiskit_ibm.accountprovider import AccountProvider
 from qiskit_ibm.credentials import Credentials
-from qiskit_ibm.runtime.utils import RuntimeEncoder, RuntimeDecoder
+from qiskit_ibm.exceptions import IBMQInputValueError
 from qiskit_ibm.runtime import IBMRuntimeService, RuntimeJob
 from qiskit_ibm.runtime.constants import API_TO_JOB_ERROR_MESSAGE
-from qiskit_ibm.runtime.exceptions import RuntimeProgramNotFound, RuntimeJobFailureError
-from qiskit_ibm.runtime.runtime_program import ParameterNamespace, ProgramParameter, ProgramResult
+from qiskit_ibm.runtime.exceptions import (RuntimeJobFailureError,
+                                           RuntimeProgramNotFound)
+from qiskit_ibm.runtime.runtime_program import (ParameterNamespace,
+                                                ProgramParameter,
+                                                ProgramResult)
+from qiskit_ibm.runtime.utils import RuntimeDecoder, RuntimeEncoder
 
 from ...ibmqtestcase import IBMQTestCase
-from .fake_runtime_client import (BaseFakeRuntimeClient, FailedRanTooLongRuntimeJob,
-                                  FailedRuntimeJob, CancelableRuntimeJob, CustomResultRuntimeJob)
-from .utils import SerializableClass, SerializableClassDecoder, get_complex_types
+from .fake_runtime_client import (BaseFakeRuntimeClient, CancelableRuntimeJob,
+                                  CustomResultRuntimeJob,
+                                  FailedRanTooLongRuntimeJob, FailedRuntimeJob)
+from .utils import (SerializableClass, SerializableClassDecoder,
+                    get_complex_types)
 
 
 class TestRuntime(IBMQTestCase):
