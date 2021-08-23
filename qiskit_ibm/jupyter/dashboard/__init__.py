@@ -1,6 +1,6 @@
 # This code is part of Qiskit.
 #
-# (C) Copyright IBM 2017, 2019.
+# (C) Copyright IBM 2021.
 #
 # This code is licensed under the Apache License, Version 2.0. You may
 # obtain a copy of this license in the LICENSE.txt file in the root directory
@@ -21,11 +21,12 @@ The dashboard can be instantiated using
 
 .. jupyter-execute::
 
-    from qiskit import IBMQ
+    from qiskit_ibm import IBMAccount
     import qiskit_ibm.jupyter
 
-    IBMQ.load_account()
+    account = IBMAccount()
+    account.load()
 
-    %iqx_dashboard
+    %ibm_quantum_dashboard
 
 """

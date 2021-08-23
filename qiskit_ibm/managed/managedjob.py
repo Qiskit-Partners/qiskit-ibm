@@ -1,6 +1,6 @@
 # This code is part of Qiskit.
 #
-# (C) Copyright IBM 2019, 2020.
+# (C) Copyright IBM 2021.
 #
 # This code is licensed under the Apache License, Version 2.0. You may
 # obtain a copy of this license in the LICENSE.txt file in the root directory
@@ -25,12 +25,12 @@ from qiskit.result import Result
 from qiskit.providers.jobstatus import JobStatus
 from qiskit.providers.exceptions import JobError
 
-from qiskit_ibm import IBMQBackend
+from qiskit_ibm import IBMBackend
 from qiskit_ibm.apiconstants import API_JOB_FINAL_STATES
 
-from ..job.ibmqjob import IBMQJob
-from ..job.exceptions import IBMQJobTimeoutError
-from ..exceptions import IBMQBackendJobLimitError
+from ..job.ibm_job import IBMJob
+from ..job.exceptions import IBMJobTimeoutError
+from ..exceptions import IBMBackendValueError
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class ManagedJob:
             self,
             start_index: int,
             experiments_count: int,
-            job: Optional[IBMQJob] = None
+            job: Optional[IBMJob] = None
     ):
         """ManagedJob constructor.
 
@@ -56,14 +56,14 @@ class ManagedJob:
         self.future = None
 
         # Properties that may be populated by the future.
-        self.job = job  # type: Optional[IBMQJob]
+        self.job = job  # type: Optional[IBMJob]
         self.submit_error = None  # type: Optional[Exception]
 
     def submit(
             self,
             circuits: Union[QuantumCircuit, Schedule, List[Union[QuantumCircuit, Schedule]]],
             job_name: str,
-            backend: IBMQBackend,
+            backend: IBMBackend,
             executor: ThreadPoolExecutor,
             submit_lock: Lock,
             job_tags: Optional[List[str]] = None,
@@ -92,7 +92,7 @@ class ManagedJob:
             self,
             circuits: Union[QuantumCircuit, Schedule, List[Union[QuantumCircuit, Schedule]]],
             job_name: str,
-            backend: IBMQBackend,
+            backend: IBMBackend,
             submit_lock: Lock,
             job_tags: Optional[List[str]] = None,
             **run_config: Dict
@@ -119,7 +119,7 @@ class ManagedJob:
                         job_name=job_name,
                         job_tags=job_tags,
                         **run_config)
-                except IBMQBackendJobLimitError:
+                except IBMBackendValueError:
                     final_states = [state.value for state in API_JOB_FINAL_STATES]
                     oldest_running = backend.jobs(limit=1, descending=False,
                                                   db_filter={"status": {"nin": final_states}})
@@ -183,14 +183,14 @@ class ManagedJob:
             Job result or ``None`` if result could not be retrieved.
 
         Raises:
-            IBMQJobTimeoutError: If the job does not return results before a
+            IBMJobTimeoutError: If the job does not return results before a
                 specified timeout.
         """
         result = None
         if self.job is not None:
             try:
                 result = self.job.result(timeout=timeout, partial=partial, refresh=refresh)
-            except IBMQJobTimeoutError:
+            except IBMJobTimeoutError:
                 raise
             except JobError as err:
                 warnings.warn(

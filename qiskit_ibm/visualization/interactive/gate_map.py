@@ -1,6 +1,6 @@
 # This code is part of Qiskit.
 #
-# (C) Copyright IBM 2017, 2019.
+# (C) Copyright IBM 2021.
 #
 # This code is licensed under the Apache License, Version 2.0. You may
 # obtain a copy of this license in the LICENSE.txt file in the root directory
@@ -10,19 +10,19 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Interactive gate map for IBM Quantum Experience devices."""
+"""Interactive gate map for IBM Quantum devices."""
 
 from typing import Tuple, Union, Optional, List
 
 import plotly.graph_objects as go
-from qiskit_ibm.ibmqbackend import IBMQBackend
+from qiskit_ibm.ibm_backend import IBMBackend
 
 from .plotly_wrapper import PlotlyWidget, PlotlyFigure
 from ..device_layouts import DEVICE_LAYOUTS
 
 
 def iplot_gate_map(
-        backend: IBMQBackend,
+        backend: IBMBackend,
         figsize: Tuple[Optional[int], Optional[int]] = (None, None),
         label_qubits: bool = True,
         qubit_size: Optional[float] = None,
@@ -60,21 +60,25 @@ def iplot_gate_map(
     Example:
 
         .. jupyter-execute::
-            :hide-code:
-            :hide-output:
 
-            from qiskit.test.ibmq_mock import mock_get_backend
-            mock_get_backend('FakeVigo')
+           from qiskit_ibm import IBMAccount
+           from qiskit_ibm.visualization import iplot_gate_map
+
+           account = IBMAccount()
 
 
         .. jupyter-execute::
+            :hide-code:
+            :hide-output:
 
-           from qiskit import IBMQ
-           from qiskit_ibm.visualization import iplot_gate_map
+            from qiskit_ibm.test.ibm_account_mock import get_mock_ibm_account
+            account = get_mock_ibm_account('FakeVigo')
 
-           IBMQ.load_account()
+        .. jupyter-execute::
 
-           provider = IBMQ.get_provider(group='open', project='main')
+           account.load()
+
+           provider = account.provider(group='open', project='main')
            backend = provider.get_backend('ibmq_vigo')
 
            iplot_gate_map(backend, as_widget=True)
