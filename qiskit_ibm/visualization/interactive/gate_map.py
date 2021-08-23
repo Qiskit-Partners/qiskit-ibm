@@ -76,9 +76,9 @@ def iplot_gate_map(
 
         .. jupyter-execute::
 
-           account.load_account()
+           account.load()
 
-           provider = account.get_provider(group='open', project='main')
+           provider = account.provider(group='open', project='main')
            backend = provider.get_backend('ibmq_vigo')
 
            iplot_gate_map(backend, as_widget=True)

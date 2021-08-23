@@ -47,7 +47,7 @@ class IBMJobManager:
         from qiskit.circuit.random import random_circuit
 
         account = IBMAccount()
-        provider = account.load_account()
+        provider = account.load()
         backend = provider.get_backend('ibmq_qasm_simulator')
 
         # Build a thousand circuits.

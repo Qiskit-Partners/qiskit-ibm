@@ -214,7 +214,7 @@ def get_provider(
     Returns:
         A provider, as specified by `default`.
     """
-    provider_to_return = account.enable_account(qe_token, url=qe_url)  # Default provider.
+    provider_to_return = account.enable(qe_token, url=qe_url)  # Default provider.
     if not default:
         # Get a non default provider (i.e.not the default open access project).
         providers = account.providers()
@@ -222,7 +222,7 @@ def get_provider(
             if provider != provider_to_return:
                 provider_to_return = provider
                 break
-    account.disable_account()
+    account.disable()
 
     return provider_to_return
 

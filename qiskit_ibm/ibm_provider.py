@@ -75,22 +75,22 @@ class IBMProvider(Provider):
 
     If parameters are not passed and environment variables are not set then this class looks
     for credentials (token / url) and default provider (hub / group / project) stored in the
-    qiskitrc file using the :meth:`IBMAccount.save_account()<IBMAccount.save_account>` method.
+    qiskitrc file using the :meth:`IBMAccount.save()<IBMAccount.save>` method.
 
     `token` is the only required attribute that needs to be set using one of the above methods.
     If no `url` is set, it defaults to 'https://auth.quantum-computing.ibm.com/api'.
     If no `hub`, `group` and `project` is set, it defaults to the open provider. (ibm-q/open/main)
 
     You can also access a provider by enabling an account with the
-    :meth:`IBMAccount.enable_account()<IBMAccount.enable_account>` method, which
+    :meth:`IBMAccount.enable()<IBMAccount.enable>` method, which
     returns the default provider you have access to::
 
         from qiskit_ibm import IBMAccount
         account = IBMAccount()
-        provider = account.enable_account(<INSERT_IBM_QUANTUM_TOKEN>)
+        provider = account.enable(<INSERT_IBM_QUANTUM_TOKEN>)
 
     To select a different provider, use the
-    :meth:`IBMAccount.get_provider()<IBMAccount.get_provider>` method and specify the hub,
+    :meth:`IBMAccount.provider()<IBMAccount.provider>` method and specify the hub,
     group, or project name of the desired provider.
 
     Each provider may offer different services. The main service,

@@ -33,7 +33,7 @@ class RuntimeProgram:
         from qiskit_ibm import IBMAccount
 
         account = IBMAccount()
-        provider = account.load_account()
+        provider = account.load()
 
         # To retrieve metadata of all programs.
         programs = provider.runtime.programs()

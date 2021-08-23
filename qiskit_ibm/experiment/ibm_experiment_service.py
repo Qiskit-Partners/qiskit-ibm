@@ -50,7 +50,7 @@ class IBMExperimentService:
 
         from qiskit_ibm import IBMAccount
         account = IBMAccount()
-        provider = account.load_account()
+        provider = account.load()
 
         # Retrieve all experiments.
         experiments = provider.experiment.experiments()

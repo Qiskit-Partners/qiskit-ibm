@@ -333,7 +333,7 @@ class IBMDashboardMagic(Magics):
         pro = account.providers()
         if not pro:
             try:
-                account.load_account()
+                account.load()
             except Exception:
                 raise QiskitError(
                     "Could not load IBM Quantum account from the local file.")

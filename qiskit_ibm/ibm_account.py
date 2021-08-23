@@ -47,7 +47,7 @@ class IBMAccount:
 
     # Account management functions.
 
-    def enable_account(
+    def enable(
             self,
             token: str,
             url: str = QISKIT_IBM_API_URL,
@@ -111,11 +111,11 @@ class IBMAccount:
 
         # If any `hub`, `group`, or `project` is specified, return the corresponding provider.
         if any([hub, group, project]):
-            default_provider = self.get_provider(hub=hub, group=group, project=project)
+            default_provider = self.provider(hub=hub, group=group, project=project)
 
         return default_provider
 
-    def disable_account(self) -> None:
+    def disable(self) -> None:
         """Disable the account currently in use for the session.
 
         Raises:
@@ -132,7 +132,7 @@ class IBMAccount:
         self._user_hubs = None
         self._preferences = None
 
-    def load_account(self) -> Optional[IBMProvider]:
+    def load(self) -> Optional[IBMProvider]:
         """Authenticate against IBM Quantum from stored credentials.
 
         Returns:
@@ -176,7 +176,7 @@ class IBMAccount:
             # For convention, emit a warning instead of raising.
             logger.warning('Credentials are already in use. The existing '
                            'account in the session will be replaced.')
-            self.disable_account()
+            self.disable()
 
         self._initialize_providers(credentials, preferences)
 
@@ -193,19 +193,19 @@ class IBMAccount:
         if credentials.default_provider:
             hub, group, project = credentials.default_provider.to_tuple()
             try:
-                default_provider = self.get_provider(hub=hub, group=group, project=project)
+                default_provider = self.provider(hub=hub, group=group, project=project)
             except IBMProviderError as ex:
                 raise IBMProviderError('The default provider (hub/group/project) stored on '
                                        'disk could not be found: {}.'
                                        'To overwrite the default provider stored on disk, use '
-                                       'the save_account(overwrite=True) method and specify the '
+                                       'the save(overwrite=True) method and specify the '
                                        'default provider you would like to save.'
                                        .format(str(ex))) from None
 
         return default_provider
 
     @staticmethod
-    def save_account(
+    def save(
             token: str,
             url: str = QISKIT_IBM_API_URL,
             hub: Optional[str] = None,
@@ -266,7 +266,7 @@ class IBMAccount:
                           overwrite=overwrite)
 
     @staticmethod
-    def delete_account() -> None:
+    def delete() -> None:
         """Delete the saved account from disk.
 
         Raises:
@@ -289,7 +289,7 @@ class IBMAccount:
         remove_credentials(credentials)
 
     @staticmethod
-    def stored_account() -> Dict[str, str]:
+    def saved() -> Dict[str, str]:
         """List the account saved on disk.
 
         Returns:
@@ -314,7 +314,7 @@ class IBMAccount:
             'url': credentials.url
         }
 
-    def active_account(self) -> Optional[Dict[str, str]]:
+    def active(self) -> Optional[Dict[str, str]]:
         """Return the IBM Quantum account currently in use for the session.
 
         Returns:
@@ -362,7 +362,7 @@ class IBMAccount:
 
         return providers
 
-    def get_provider(
+    def provider(
             self,
             hub: Optional[str] = None,
             group: Optional[str] = None,
@@ -394,15 +394,6 @@ class IBMAccount:
                                    .format(hub, group, project))
 
         return providers[0]
-
-    enable = enable_account
-    disable = disable_account
-    load = load_account
-    save = save_account
-    delete = delete_account
-    saved = stored_account
-    active = active_account
-    provider = get_provider
 
     # Private functions.
 

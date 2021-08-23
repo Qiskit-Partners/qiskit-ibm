@@ -28,7 +28,7 @@ experiments, experiment figures, and analysis results. For example::
 
     from qiskit_ibm import IBMAccount
     account = IBMAccount()
-    provider = account.load_account()
+    provider = account.load()
     experiments = provider.experiment.experiments()
 
 All the available functions can be invoked using the `provider.experiment`

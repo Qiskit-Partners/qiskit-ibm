@@ -25,7 +25,7 @@ The dashboard can be instantiated using
     import qiskit_ibm.jupyter
 
     account = IBMAccount()
-    account.load_account()
+    account.load()
 
     %ibm_quantum_dashboard
 

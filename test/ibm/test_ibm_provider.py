@@ -109,7 +109,7 @@ class TestIBMProviderInitialization(IBMTestCase):
     def test_provider_init_saved_account(self, qe_token, qe_url):
         """Test initializing a provider with credentials from qiskitrc file."""
         with custom_qiskitrc(), no_envs(CREDENTIAL_ENV_VARS):
-            self.account.save_account(qe_token, url=qe_url)
+            self.account.save(qe_token, url=qe_url)
             provider = IBMProvider()
 
         self.assertIsInstance(provider, IBMProvider)

@@ -56,10 +56,10 @@ class TestProxies(IBMTestCase):
 
     @requires_qe_access
     def test_proxies_ibm_account(self, qe_token, qe_url):
-        """Should reach the proxy using account.enable_account."""
+        """Should reach the proxy using account.enable."""
         account = IBMAccount()
-        provider = account.enable_account(qe_token, qe_url,
-                                          proxies={'urls': VALID_PROXIES})
+        provider = account.enable(qe_token, qe_url,
+                                  proxies={'urls': VALID_PROXIES})
 
         self.proxy_process.terminate()  # kill to be able of reading the output
 

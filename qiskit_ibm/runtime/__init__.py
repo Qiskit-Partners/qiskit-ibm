@@ -27,8 +27,8 @@ Modules related to Qiskit Runtime Service.
         from qiskit_ibm import IBMAccount
 
         account = IBMAccount()
-        account.load_account()
-        provider = account.get_provider(...)
+        account.load()
+        provider = account.provider(...)
 
         can_use_runtime = provider.has_service('runtime')
 
@@ -66,7 +66,7 @@ To list all available runtime programs::
     from qiskit_ibm import IBMAccount
 
     account = IBMAccount()
-    provider = account.load_account()
+    provider = account.load()
 
     # List all available programs.
     provider.runtime.pprint_programs()
@@ -96,7 +96,7 @@ For example::
 
 
     account = IBMAccount()
-    provider = account.load_account()
+    provider = account.load()
     backend = provider.backend.ibmq_qasm_simulator
 
     # Create a circuit.
@@ -147,7 +147,7 @@ the :meth:`RuntimeJob.stream_results` method. For example::
     from qiskit_ibm import IBMAccount
 
     account = IBMAccount()
-    provider = account.load_account()
+    provider = account.load()
     backend = provider.backend.ibmq_qasm_simulator
 
     def interim_result_callback(job_id, interim_result):
@@ -196,7 +196,7 @@ For example::
     from qiskit_ibm import IBMAccount
 
     account = IBMAccount()
-    provider = account.load_account()
+    provider = account.load()
     program_id = provider.runtime.upload_program(
                     data="my_vqe.py",
                     metadata="my_vqe_metadata.json",

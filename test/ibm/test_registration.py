@@ -50,12 +50,12 @@ class TestCredentials(IBMTestCase):
     """Tests for the credential modules."""
 
     def test_load_account_no_credentials(self) -> None:
-        """Test ``load_account()`` with no credentials available."""
+        """Test ``load()`` with no credentials available."""
         account = IBMAccount()
 
         with custom_qiskitrc(), no_envs(CREDENTIAL_ENV_VARS):
             with self.assertRaises(IBMAccountError) as context_manager:
-                account.load_account()
+                account.load()
 
         self.assertIn('No IBM Quantum credentials found',
                       str(context_manager.exception))
@@ -83,7 +83,7 @@ class TestCredentials(IBMTestCase):
             with no_envs(CREDENTIAL_ENV_VARS), mock_ibm_provider():
                 # Attempt overwriting.
                 store_credentials(credentials2, overwrite=True)
-                account.load_account()
+                account.load()
 
         # Ensure that the credentials are the overwritten ones.
         self.assertEqual(account._credentials, credentials2)

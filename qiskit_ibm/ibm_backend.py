@@ -71,7 +71,7 @@ class IBMBackend(Backend):
         from qiskit.circuit.random import random_circuit
 
         account = IBMAccount()
-        provider = account.load_account()
+        provider = account.load()
         backend = provider.backend.ibmq_vigo
         qx = random_circuit(n_qubits=5, depth=4)
         transpiled = transpile(qx, backend=backend)

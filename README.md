@@ -12,12 +12,12 @@ If you are migrating from `qiskit-ibmq-provider` please follow the instructions 
 
 ## Installation
 
-> **The Qiskit IBM Provider requires** `qiskit-terra>=0.18.1`!
+> **The Qiskit IBM Provider requires** `qiskit-terra`!
 >
 > To ensure you are on the latest version, run:
 >
 > ```bash
-> pip install -U "qiskit-terra>=0.18.1"
+> pip install -U qiskit-terra
 > ```
 
 You can install the provider using pip:

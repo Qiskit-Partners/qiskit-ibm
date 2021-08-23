@@ -45,8 +45,8 @@ Detailed information on a single backend
 
 .. jupyter-execute::
 
-    account.load_account()
-    provider = account.get_provider(hub='ibm-q')
+    account.load()
+    provider = account.provider(hub='ibm-q')
     backend = provider.get_backend('ibmq_vigo')
 
 .. jupyter-execute::

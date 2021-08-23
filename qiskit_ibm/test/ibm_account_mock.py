@@ -36,5 +36,5 @@ def get_mock_ibm_account(backend):
         raise NameError("The specified backend name is not a valid mock from " "qiskit.test.mock")
     fake_backend = getattr(backend_mocks, backend)()
     mock_provider.get_backend.return_value = fake_backend
-    mock_ibm_account.get_provider.return_value = mock_provider
+    mock_ibm_account.provider.return_value = mock_provider
     return mock_ibm_account

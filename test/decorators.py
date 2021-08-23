@@ -96,7 +96,7 @@ def requires_providers(func):
         qe_url = kwargs.pop('qe_url')
 
         # Get the open access project public provider.
-        public_provider = account.enable_account(qe_token, qe_url)
+        public_provider = account.enable(qe_token, qe_url)
         # Get a premium provider.
         premium_provider = _get_custom_provider(account)
 
@@ -162,7 +162,7 @@ def requires_private_provider(func):
             raise SkipTest('Requires private provider.')
 
         hgp = hgp.split('/')
-        provider = ACCOUNT.get_provider(hub=hgp[0], group=hgp[1], project=hgp[2])
+        provider = ACCOUNT.provider(hub=hgp[0], group=hgp[1], project=hgp[2])
         kwargs.update({'provider': provider})
 
         return func(*args, **kwargs)
@@ -308,7 +308,7 @@ def _get_custom_provider(account: IBMAccount) -> Optional[IBMProvider]:
         else os.getenv('QISKIT_IBM_HGP', None)
     if hgp:
         hgp = hgp.split('/')
-        return account.get_provider(hub=hgp[0], group=hgp[1], project=hgp[2])
+        return account.provider(hub=hgp[0], group=hgp[1], project=hgp[2])
     return None  # No custom provider.
 
 
@@ -319,9 +319,9 @@ def _enable_account(qe_token: str, qe_url: str) -> None:
         qe_token: API token.
         qe_url: API URL.
     """
-    active_account = ACCOUNT.active_account()
+    active_account = ACCOUNT.active()
     if active_account:
         if active_account.get('token', '') == qe_token:
             return
-        ACCOUNT.disable_account()
-    ACCOUNT.enable_account(qe_token, qe_url)
+        ACCOUNT.disable()
+    ACCOUNT.enable(qe_token, qe_url)
