@@ -18,6 +18,7 @@ import uuid
 import time
 import random
 from contextlib import suppress
+from qiskit.exceptions import QiskitError
 
 from qiskit.providers.jobstatus import JobStatus, JOB_FINAL_STATES
 from qiskit.test.reference_circuits import ReferenceCircuits
@@ -160,6 +161,50 @@ def main(backend, user_messenger, **kwargs):
         self.assertTrue(program)
         self.assertEqual(max_execution_time, program.max_execution_time)
         self.assertEqual(program.is_public, is_public)
+
+    def test_update_program_bytes(self):
+        """Test updating a program via byte-encoded string.
+        NOTE: When a Qiskit Runtime API endpoint is created to GET
+         a runtime program in plaintext, update this test to verify the
+         program is modified.
+        """
+        # Create some program
+        program_id = self._upload_program()
+        self.assertTrue(program_id)
+        # Update the program data (last 2 lines differ from original)
+        new_program = self.RUNTIME_PROGRAM.replace('warnings.warn("this is a stderr message")',
+                                                   'warnings.warn("this is not a stderr message")')
+        # Execute with bytes
+        self.provider.runtime.update_program(program_id, new_program.encode())
+
+    def test_update_program_filepath(self):
+        """Test updating a program via filepath.
+        NOTE: When a Qiskit Runtime API endpoint is created to GET
+         a runtime program in plaintext, update this test to verify the
+         program is modified.
+        """
+        # Create some program
+        program_id = self._upload_program()
+        self.assertTrue(program_id)
+        # Update the program data (last 2 lines differ from original)
+        new_program = self.RUNTIME_PROGRAM.replace('warnings.warn("this is a stderr message")',
+                                                   'warnings.warn("this is not a stderr message")')
+        # Prepare file data
+        directory = os.path.dirname(__file__)
+        program_file_path = os.path.join(directory, "update-program-testfile.py")
+        program_file = open(program_file_path, "w+")
+        program_file.write(new_program)
+        program_file.close()
+        # Execute with filepath
+        try:
+            self.provider.runtime.update_program(program_id, program_file_path)
+            # Remove temp file
+            os.remove(program_file_path)
+        except QiskitError as err:
+            # Remove temp file
+            os.remove(program_file_path)
+            # Fail test
+            self.fail(err.message)
 
     def test_set_visibility(self):
         """Test setting the visibility of a program."""

@@ -46,6 +46,7 @@ from qiskit.opflow import (PauliSumOp, MatrixOp, PauliOp, CircuitOp, EvolvedOp,
                            SparseVectorStateFn, CVaRMeasurement, ComposedOp, SummedOp, TensoredOp)
 from qiskit.quantum_info import SparsePauliOp, Pauli, PauliTable, Statevector
 from qiskit.providers.jobstatus import JobStatus
+from qiskit.exceptions import QiskitError
 
 from qiskit_ibm.exceptions import IBMQInputValueError
 from qiskit_ibm.accountprovider import AccountProvider
@@ -348,6 +349,31 @@ if __name__ == '__main__':
         params = self.runtime.program(program_id).parameters()
         params.param1 = "Hello World"
         self._run_program(program_id, inputs=params)
+
+    def test_program_upload_data_bytes(self):
+        """Test updating a program's string."""
+        program_id = self._upload_program()
+        self.runtime.update_program(program_id, 'print("Hello, Qiskit Provider.")'.encode())
+
+    def test_program_upload_data_filepath(self):
+        """Test updating a program's string."""
+        program_id = self._upload_program()
+        # Prepare file data
+        directory = os.path.dirname(__file__)
+        program_file_path = os.path.join(directory, "update-program-testfile.py")
+        program_file = open(program_file_path, "w+")
+        program_file.write('print("Hello, Qiskit Provider.")')
+        program_file.close()
+        # Update program
+        try:
+            self.runtime.update_program(program_id, program_file_path)
+            # Remove temp file
+            os.remove(program_file_path)
+        except QiskitError as err:
+            # Remove temp file
+            os.remove(program_file_path)
+            # Fail test
+            self.fail(err.message)
 
     def test_run_program_failed(self):
         """Test a failed program execution."""

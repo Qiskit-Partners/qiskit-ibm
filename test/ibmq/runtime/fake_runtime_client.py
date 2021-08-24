@@ -259,7 +259,7 @@ class BaseFakeRuntimeClient:
 
     def program_get_data(self, program_id: str):
         """Return a specific program and its data."""
-        return self._programs[program_id].to_dict(iclude_data=True)
+        return self._programs[program_id].to_dict(include_data=True)
 
     def program_run(
             self,
@@ -311,6 +311,15 @@ class BaseFakeRuntimeClient:
                 If ``False``, make the program visible to just your account.
         """
         self._programs[program_id]._is_public = public
+
+    def set_program_data(self, program_id: str, data: bytes) -> None:
+        """Sets a program's data.
+
+        Args:
+            program_id: Program ID.
+            data: Name of the program file or program data to upload.
+        """
+        self._programs[program_id]._data = data
 
     def job_results(self, job_id):
         """Get the results of a program job."""

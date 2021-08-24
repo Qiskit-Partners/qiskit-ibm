@@ -108,6 +108,14 @@ class RuntimeClient:
         """
         return self.api.program(program_id).get_data()
 
+    def set_program_data(self, program_id: str, data: bytes) -> None:
+        """Sets a program's data.
+        Args:
+            program_id: Program ID.
+            data: Name of the program file or program data to upload.
+        """
+        self.api.program(program_id).set_data(data=data)
+
     def set_program_visibility(self, program_id: str, public: bool) -> None:
         """Sets a program's visibility.
 

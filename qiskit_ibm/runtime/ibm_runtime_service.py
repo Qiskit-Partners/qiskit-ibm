@@ -12,13 +12,14 @@
 
 """Qiskit runtime service."""
 
+import base64
 import logging
 from typing import Dict, Callable, Optional, Union, List, Any, Type
 import json
 import copy
 
 from qiskit.providers.exceptions import QiskitBackendNotFoundError
-from qiskit_ibm import accountprovider  # pylint: disable=unused-import
+from qiskit.providers.ibmq import accountprovider  # pylint: disable=unused-import
 
 from .runtime_job import RuntimeJob
 from .runtime_program import RuntimeProgram, ProgramParameter, ProgramResult, ParameterNamespace
@@ -53,7 +54,7 @@ class IBMRuntimeService:
     A sample workflow of using the runtime service::
 
         from qiskit import IBMQ, QuantumCircuit
-        from qiskit_ibm import RunnerResult
+        from qiskit_ibm.ibmq import RunnerResult
 
         provider = IBMQ.load_account()
         backend = provider.backend.ibmq_qasm_simulator
@@ -89,7 +90,7 @@ class IBMRuntimeService:
     the results at a later time, but before the job finishes.
 
     The :meth:`run` method returns a
-    :class:`~qiskit_ibm.runtime.RuntimeJob` object. You can use its
+    :class:`~qiskit.providers.ibmq.runtime.RuntimeJob` object. You can use its
     methods to perform tasks like checking job status, getting job result, and
     canceling job.
     """
@@ -409,15 +410,41 @@ class IBMRuntimeService:
                 If ``False``, make the program visible to just your account.
 
         Raises:
-            RuntimeJobNotFound: if program not found (404)
+            RuntimeProgramNotFound: if program not found (404)
             QiskitRuntimeError: if update failed (401, 403)
         """
         try:
             self._api_client.set_program_visibility(program_id, public)
         except RequestsApiError as ex:
             if ex.status_code == 404:
-                raise RuntimeJobNotFound(f"Program not found: {ex.message}") from None
+                raise RuntimeProgramNotFound(f"Program not found: {ex.message}") from None
             raise QiskitRuntimeError(f"Failed to set program visibility: {ex}") from None
+
+    def update_program(self, program_id: str, data: Union[bytes, str]) -> None:
+        """Update a runtime program's data.
+
+        Args:
+            program_id: Program ID
+            data: Name of the program file or program data to upload.
+
+        Raises:
+            FileNotFoundError: If the data filepath does not exist.
+            RuntimeProgramNotFound: If the program doesn't exist.
+            QiskitRuntimeError: If the request failed.
+            IBMQNotAuthorizedError: If not authorized to update program
+        """
+        # Encode program data
+        data = self._encode_program_data(data)
+        # Set the new program data
+        try:
+            self._api_client.set_program_data(program_id, data=data)
+        except RequestsApiError as ex:
+            if ex.status_code == 404:
+                raise RuntimeProgramNotFound(f"Program not found: {ex.message}") from None
+            if ex.status_code == 403:
+                raise IBMQNotAuthorizedError(
+                    "You are not authorized to update this program.") from None
+            raise QiskitRuntimeError(f"Failed to set program data: {ex}") from None
 
     def job(self, job_id: str) -> RuntimeJob:
         """Retrieve a runtime job.
@@ -542,6 +569,25 @@ class IBMRuntimeService:
                           program_id=raw_data.get('program', {}).get('id', ""),
                           params=decoded,
                           creation_date=raw_data.get('created', None))
+
+    def _encode_program_data(self, data: Union[bytes, str]) -> bytes:
+        """Encodes a runtime program data into Base64. Program data can be
+        either a filepath (str) or raw bytes.
+
+        Args:
+            data: the program data
+
+        Raises:
+            FileNotFoundError: If the data filepath does not exist.
+
+        Returns:
+            the encoded data
+        """
+        # Convert any file data into bytes
+        if isinstance(data, str):
+            with open(data, 'r') as file:
+                data = file.read().encode()
+        return base64.b64encode(data)
 
     def logout(self) -> None:
         """Clears authorization cache on the server.
