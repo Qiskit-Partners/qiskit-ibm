@@ -12,33 +12,42 @@
 
 """Provider for a single IBM Quantum Experience account."""
 
-import logging
-from typing import Dict, List, Optional, Any, Callable, Union
-from collections import OrderedDict
-import traceback
 import copy
+import logging
+import traceback
+from collections import OrderedDict
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from qiskit.providers import ProviderV1 as Provider  # type: ignore[attr-defined]
-from qiskit.providers.models import (QasmBackendConfiguration,
-                                     PulseBackendConfiguration)
 from qiskit.circuit import QuantumCircuit
+from qiskit.providers import \
+    ProviderV1 as Provider  # type: ignore[attr-defined]
 from qiskit.providers.backend import BackendV1 as Backend
 from qiskit.providers.basebackend import BaseBackend
+from qiskit.providers.exceptions import QiskitBackendNotFoundError
+from qiskit.providers.models import (PulseBackendConfiguration,
+                                     QasmBackendConfiguration)
 from qiskit.transpiler import Layout
 
+from qiskit_ibm import \
+    ibmqfactory  # pylint: disable=unused-import,cyclic-import
+from qiskit_ibm.api.exceptions import RequestsApiError
 from qiskit_ibm.runtime import runtime_job  # pylint: disable=unused-import
-from qiskit_ibm import ibmqfactory  # pylint: disable=unused-import,cyclic-import
 
 from .api.clients import AccountClient
-from .ibmqbackend import IBMQBackend, IBMQSimulator  # pylint: disable=cyclic-import
 from .credentials import Credentials
-from .ibmqbackendservice import IBMQBackendService  # pylint: disable=cyclic-import
-from .utils.json_decoder import decode_backend_configuration
-from .random.ibmqrandomservice import IBMQRandomService  # pylint: disable=cyclic-import
+from .exceptions import IBMQInputValueError, IBMQNotAuthorizedError
 from .experiment import IBMExperimentService  # pylint: disable=cyclic-import
-from .runtime.ibm_runtime_service import IBMRuntimeService  # pylint: disable=cyclic-import
-from .exceptions import IBMQNotAuthorizedError, IBMQInputValueError
+from .ibmqbackend import IBMQBackend  # pylint: disable=cyclic-import
+from .ibmqbackend import IBMQSimulator
+from .ibmqbackendservice import \
+    IBMQBackendService  # pylint: disable=cyclic-import
+from .random.ibmqrandomservice import \
+    IBMQRandomService  # pylint: disable=cyclic-import
 from .runner_result import RunnerResult  # pylint: disable=cyclic-import
+from .runtime.ibm_runtime_service import \
+    IBMRuntimeService  # pylint: disable=cyclic-import
+from .utils.json_decoder import decode_backend_configuration
+from .utils.utils import to_python_identifier
 
 logger = logging.getLogger(__name__)
 
@@ -128,6 +137,7 @@ class AccountProvider(Provider):
                           'random': self._random,
                           'experiment': self._experiment,
                           'runtime': self._runtime}
+        self._loaded_all_backends = False
 
     @property
     def _backends(self) -> Dict[str, IBMQBackend]:
@@ -136,8 +146,9 @@ class AccountProvider(Provider):
         Returns:
             Dict[str, IBMQBackend]: the backends
         """
-        if not self.__backends:
+        if not self._loaded_all_backends:
             self.__backends = self._discover_remote_backends()
+            self._loaded_all_backends = True
         return self.__backends
 
     @_backends.setter
@@ -179,18 +190,34 @@ class AccountProvider(Provider):
         # replaced by a `IBMQBackendService` instance.
         pass
 
-    def _discover_remote_backends(self, timeout: Optional[float] = None) -> Dict[str, IBMQBackend]:
+    def _discover_remote_backends(self,
+                                  backend_names: List[str] = None,
+                                  timeout: Optional[float] = None) -> Dict[str, IBMQBackend]:
         """Return the remote backends available for this provider.
 
         Args:
             timeout: Maximum number of seconds to wait for the discovery of
                 remote backends.
+            backend_names: The backends to retrieve. If not specified, retrieves all.
+
+        Raises:
+            QiskitBackendNotFoundError: if backend not found
 
         Returns:
             A dict of the remote backend instances, keyed by backend name.
         """
         ret = OrderedDict()  # type: ignore[var-annotated]
-        configs_list = self._api_client.list_backends(timeout=timeout)
+        if backend_names:
+            try:
+                configs_list = [self._api_client.backend_config(
+                    backend_name) for backend_name in backend_names]
+            except RequestsApiError as err:
+                if err.status_code == 404:
+                    raise QiskitBackendNotFoundError("No backend matches the criteria")
+                raise QiskitBackendNotFoundError("Backend request is invalid.")
+
+        else:
+            configs_list = self._api_client.list_backends(timeout=timeout)
         for raw_config in configs_list:
             # Make sure the raw_config is of proper type
             if not isinstance(raw_config, dict):
@@ -205,11 +232,13 @@ class AccountProvider(Provider):
                 except (KeyError, TypeError):
                     config = QasmBackendConfiguration.from_dict(raw_config)
                 backend_cls = IBMQSimulator if config.simulator else IBMQBackend
-                ret[config.backend_name] = backend_cls(
+                back = backend_cls(
                     configuration=config,
                     provider=self,
                     credentials=self.credentials,
                     api_client=self._api_client)
+                ret[config.backend_name] = back
+                setattr(self._backend, to_python_identifier(config.backend_name), back)
             except Exception:  # pylint: disable=broad-except
                 logger.warning(
                     'Remote backend "%s" for provider %s could not be instantiated due to an '
@@ -218,6 +247,33 @@ class AccountProvider(Provider):
                     repr(self), traceback.format_exc())
 
         return ret
+
+    def get_backend(self, name: str = None, **kwargs: Dict[str, Any]) -> Union[IBMQBackend, Any]:
+        """Retrieve a backend.
+
+        Args:
+            name: the backend name
+            kwargs: additional backend filters
+
+        Raises:
+            QiskitBackendNotFoundError: If (1) more than one or (2) no backend matches the criteria.
+
+        Returns:
+            the backend
+        """
+        # Load backends by criteria
+        backends = self.backends(name, **kwargs)
+        # Discover by name if no corresponding backends have already been loaded.
+        # TODO: API Implement discover by filters.
+        if not backends:
+            self._discover_remote_backends(backend_names=([name] if name else None))
+            backends = self.backends(name, **kwargs)
+        if len(backends) > 1:
+            raise QiskitBackendNotFoundError("More than one backend matches the criteria")
+        if not backends:
+            raise QiskitBackendNotFoundError("No backend matches the criteria")
+
+        return backends[0]
 
     def run_circuits(
             self,

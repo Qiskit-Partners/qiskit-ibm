@@ -12,20 +12,22 @@
 
 """IBMQBackend Test."""
 
+import warnings
 from inspect import getfullargspec
 from datetime import timedelta, datetime
 from unittest import SkipTest
 from unittest.mock import patch
 
-from qiskit import QuantumCircuit, transpile, assemble
+from qiskit import QuantumCircuit, assemble, transpile
+from qiskit.providers.exceptions import QiskitBackendNotFoundError
 from qiskit.providers.models import QasmBackendConfiguration
 from qiskit.test.reference_circuits import ReferenceCircuits
 from qiskit_ibm.ibmqbackend import IBMQBackend
 from qiskit_ibm.ibmqbackendservice import IBMQBackendService
 
-from ..ibmqtestcase import IBMQTestCase
 from ..decorators import requires_device, requires_provider
-from ..utils import get_pulse_schedule, cancel_job
+from ..ibmqtestcase import IBMQTestCase
+from ..utils import cancel_job, get_pulse_schedule
 
 
 class TestIBMQBackend(IBMQTestCase):
@@ -229,3 +231,41 @@ class TestIBMQBackendService(IBMQTestCase):
                 self.assertIsNotNone(
                     getattr(reserv, attr),
                     "Reservation {} is missing attribute {}".format(reserv, attr))
+
+    def test_backend_as_attribute_valid(self):
+        """Test retrieving a backend as an attribute"""
+        sim = self.provider.backend.ibmq_qasm_simulator
+        self.assertIsNotNone(sim)
+
+    def test_backend_as_attribute_invalid(self):
+        """Test retrieving a backend as an attribute for an invalid backend name"""
+        with self.assertRaises(QiskitBackendNotFoundError):
+            self.provider.backend.fake_simulator  # pylint:disable=pointless-statement
+
+    def test_get_backend_valid(self):
+        """Test retrieving a backend from `get_backend`"""
+        sim = self.provider.get_backend('ibmq_qasm_simulator')
+        self.assertIsNotNone(sim)
+
+    def test_retrieve_all_backends(self):
+        """Test retrieving all backends"""
+        backs = self.provider.backend.backends()
+        self.assertIsNotNone(backs)
+        self.assertGreater(len(backs), 0)
+
+    def test_deprecated_service(self):
+        """Test deprecated backend service module."""
+        ref_job = self.provider.backend.jobs(limit=10, end_datetime=self.last_week)[-1]
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always", category=DeprecationWarning)
+            self.provider.backends()
+            self.assertEqual(len(w), 0, "DeprecationWarning issued for provider.backends()")
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always", category=DeprecationWarning)
+            _ = self.provider.backends.ibmq_qasm_simulator
+            self.provider.backends.retrieve_job(ref_job.job_id())
+            self.provider.backends.jobs(limit=1, end_datetime=self.last_week)
+            self.provider.backends.my_reservations()
+            self.assertGreaterEqual(len(w), 1)
