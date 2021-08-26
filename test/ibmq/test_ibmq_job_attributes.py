@@ -200,8 +200,7 @@ class TestIBMQJobAttributes(IBMQTestCase):
         if 'COMPLETED' not in self.sim_job.time_per_step():
             self.sim_job.refresh()
 
-        rjob = self.provider.backend.jobs(
-            db_filter={'id': self.sim_job.job_id()}, start_datetime=self.last_week)[0]
+        rjob = self.provider.backend.jobs(start_datetime=self.last_week)[0]
         self.assertFalse(rjob._time_per_step)
         rjob.refresh()
         self.assertEqual(rjob._time_per_step, self.sim_job._time_per_step)
@@ -236,8 +235,7 @@ class TestIBMQJobAttributes(IBMQTestCase):
                             'between the start date time {} and end date time {}'
                             .format(step, time_data, start_datetime, end_datetime))
 
-        rjob = self.provider.backend.jobs(
-            db_filter={'id': job.job_id()}, start_datetime=self.last_week)[0]
+        rjob = self.provider.backend.jobs(start_datetime=self.last_week)[0]
         self.assertTrue(rjob.time_per_step())
 
     def test_new_job_attributes(self):
