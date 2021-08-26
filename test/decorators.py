@@ -33,12 +33,9 @@ from typing import Optional
 
 from qiskit.test.testing_options import get_test_options
 from qiskit_ibm import least_busy
-from qiskit_ibm import IBMAccount
+from qiskit_ibm import IBMProvider
 from qiskit_ibm.credentials import (Credentials,
                                     discover_credentials)
-from qiskit_ibm.ibm_provider import IBMProvider
-
-ACCOUNT = IBMAccount()
 
 
 def requires_qe_access(func):
@@ -91,14 +88,13 @@ def requires_providers(func):
     @wraps(func)
     @requires_qe_access
     def _wrapper(*args, **kwargs):
-        account = IBMAccount()
         qe_token = kwargs.pop('qe_token')
         qe_url = kwargs.pop('qe_url')
 
         # Get the open access project public provider.
-        public_provider = account.enable(qe_token, qe_url)
+        public_provider = IBMProvider(qe_token, qe_url)
         # Get a premium provider.
-        premium_provider = _get_custom_provider(account)
+        premium_provider = _get_custom_provider()
 
         if premium_provider is None:
             raise SkipTest('Requires both the public provider and a premium provider.')
@@ -130,7 +126,7 @@ def requires_provider(func):
     @requires_qe_access
     def _wrapper(*args, **kwargs):
         _enable_account(kwargs.pop('qe_token'), kwargs.pop('qe_url'))
-        provider = _get_custom_provider(ACCOUNT) or list(ACCOUNT._providers.values())[0]
+        provider = _get_custom_provider() or list(IBMProvider._providers.values())[0]
         kwargs.update({'provider': provider})
 
         return func(*args, **kwargs)
@@ -162,7 +158,7 @@ def requires_private_provider(func):
             raise SkipTest('Requires private provider.')
 
         hgp = hgp.split('/')
-        provider = ACCOUNT.provider(hub=hgp[0], group=hgp[1], project=hgp[2])
+        provider = IBMProvider(hub=hgp[0], group=hgp[1], project=hgp[2])
         kwargs.update({'provider': provider})
 
         return func(*args, **kwargs)
@@ -238,11 +234,11 @@ def _get_backend(qe_token, qe_url, backend_name):
     _enable_account(qe_token, qe_url)
 
     _backend = None
-    provider = _get_custom_provider(ACCOUNT) or list(ACCOUNT._providers.values())[0]
+    provider = _get_custom_provider() or list(IBMProvider._providers.values())[0]
 
     if backend_name:
         # Put desired provider as the first in the list.
-        providers = [provider] + ACCOUNT.providers()
+        providers = [provider] + IBMProvider.providers()
         for provider in providers:
             backends = provider.backends(name=backend_name)
             if backends:
@@ -294,11 +290,8 @@ def _get_credentials():
     raise Exception('Unable to locate valid credentials.')
 
 
-def _get_custom_provider(account: IBMAccount) -> Optional[IBMProvider]:
+def _get_custom_provider() -> Optional[IBMProvider]:
     """Find the provider for the specific hub/group/project, if any.
-
-    Args:
-        account: IBMAccount instance with account already loaded.
 
     Returns:
         Custom provider or ``None`` if default is to be used.
@@ -308,7 +301,7 @@ def _get_custom_provider(account: IBMAccount) -> Optional[IBMProvider]:
         else os.getenv('QISKIT_IBM_HGP', None)
     if hgp:
         hgp = hgp.split('/')
-        return account.provider(hub=hgp[0], group=hgp[1], project=hgp[2])
+        return IBMProvider(hub=hgp[0], group=hgp[1], project=hgp[2])
     return None  # No custom provider.
 
 
@@ -319,9 +312,9 @@ def _enable_account(qe_token: str, qe_url: str) -> None:
         qe_token: API token.
         qe_url: API URL.
     """
-    active_account = ACCOUNT.active()
+    active_account = IBMProvider.active_account()
     if active_account:
         if active_account.get('token', '') == qe_token:
             return
-        ACCOUNT.disable()
-    ACCOUNT.enable(qe_token, qe_url)
+        IBMProvider.disable_account()
+    IBMProvider(qe_token, qe_url)

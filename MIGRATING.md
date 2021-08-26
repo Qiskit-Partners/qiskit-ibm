@@ -9,49 +9,26 @@ pip install qiskit-ibm
 
 ## Breaking Changes
 1. The `IBMQ` global variable which was an instance of the `IBMQFactory` has been removed.
-1. `IBMQFactory` has been renamed to `IBMAccount` class.
-1. `AccountProvider` class has been renamed to `IBMProvider` class.
-1. `IBMAccount` class now has shorter names for frequently used methods.
+1. `IBMQFactory` and `AccountProvider` classes have been removed and the functionality provided by these two classes have been combined and refactored in the new `IBMProvider` class. This class will provide a simplified interface and serve as the entrypoint going forward.
 
-    | Old Name  | New Name |
-    | ------------- | ------------- |
-    | enable_account | enable |
-    | disable_account | disable |
-    | load_account | load |
-    | save_account | save |
-    | delete_account | delete |
-    | stored_account | saved |
-    | active_account | active |
-    | get_provider | provider |
-
-For example, if you are looking to quickly migrate your existing code:
+For example, if you are looking to migrate your existing code:
 
 Before
 ```python
 from qiskit import IBMQ
-IBMQ.load_account()
-provider = IBMQ.get_provider(hub='ibm-q', group='open', project='main')
+provider = IBMQ.load_account() # loads saved account from disk and default provider (ibm-q, open, main)
 simulator_backend = provider.get_backend('ibmq_qasm_simulator')
 ```
 After
 ```python
-from qiskit_ibm import IBMAccount
-account = IBMAccount()
-account.load()
-provider = account.provider(hub='ibm-q', group='open', project='main')
+from qiskit_ibm import IBMProvider
+provider = IBMProvider() # loads saved account from disk and default provider (ibm-q, open, main)
 simulator_backend = provider.get_backend('ibmq_qasm_simulator')
 ```
 
-For any new code you are strongly encouraged to directly use the `IBMProvider` class which provides a simplified interface and is atleast 50% faster than instantiating via the `IBMAccount` class when you have multiple projects but are working mostly with a single project (hub/group/project). For example above program will look even simpler like below if you have already saved credentials using the `IBMAccount().save()` method:
-```python
-from qiskit_ibm import IBMProvider
-provider = IBMProvider()
-simulator_backend = provider.get_backend('ibmq_qasm_simulator')
-```
 Follow the provider setup instructions in the [README] to learn more.
 
 A lot of other classes have been renamed but may not be directly used by most users. Please see the [Appendix](#class-name-changes) for a complete list.
-
 
 ## Clean up
 1. Uninstall `qiskit-ibmq-provider`:
@@ -79,8 +56,8 @@ A lot of other classes have been renamed but may not be directly used by most us
 | Old Name  | New Name |
 | ------------- | ------------- |
 | IBMQ  | None (Removed)  |
-| IBMQFactory  | IBMAccount |
-| AccountProvider  | IBMProvider |
+| IBMQFactory  | None (Removed) |
+| AccountProvider  | None (Removed) |
 | IBMQBackend  | IBMBackend |
 | IBMQBackendService  | IBMBackendService |
 | IBMQJob  | IBMJob |

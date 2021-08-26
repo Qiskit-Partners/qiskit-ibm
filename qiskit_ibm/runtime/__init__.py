@@ -24,12 +24,9 @@ Modules related to Qiskit Runtime Service.
     The Qiskit Runtime service is not available to all providers. To check if your provider
     has access::
 
-        from qiskit_ibm import IBMAccount
+        from qiskit_ibm import IBMProvider
 
-        account = IBMAccount()
-        account.load()
-        provider = account.provider(...)
-
+        provider = IBMProvider()
         can_use_runtime = provider.has_service('runtime')
 
 .. note::
@@ -63,10 +60,9 @@ Listing runtime programs
 
 To list all available runtime programs::
 
-    from qiskit_ibm import IBMAccount
+    from qiskit_ibm import IBMProvider
 
-    account = IBMAccount()
-    provider = account.load()
+    provider = IBMProvider()
 
     # List all available programs.
     provider.runtime.pprint_programs()
@@ -92,11 +88,9 @@ You can use the :meth:`IBMRuntimeService.run` method to invoke a runtime program
 For example::
 
     from qiskit import QuantumCircuit
-    from qiskit_ibm import IBMAccount, RunnerResult
+    from qiskit_ibm import IBMProvider, RunnerResult
 
-
-    account = IBMAccount()
-    provider = account.load()
+    provider = IBMProvider()
     backend = provider.backend.ibmq_qasm_simulator
 
     # Create a circuit.
@@ -144,10 +138,9 @@ program by passing in the ``callback`` parameter, or at a later time using
 the :meth:`RuntimeJob.stream_results` method. For example::
 
     from qiskit import QuantumCircuit
-    from qiskit_ibm import IBMAccount
+    from qiskit_ibm import IBMProvider
 
-    account = IBMAccount()
-    provider = account.load()
+    provider = IBMProvider()
     backend = provider.backend.ibmq_qasm_simulator
 
     def interim_result_callback(job_id, interim_result):
@@ -193,10 +186,9 @@ is a sample file of program metadata.
 You can use the :meth:`IBMRuntimeService.upload_program` to upload a program.
 For example::
 
-    from qiskit_ibm import IBMAccount
+    from qiskit_ibm import IBMProvider
 
-    account = IBMAccount()
-    provider = account.load()
+    provider = IBMProvider()
     program_id = provider.runtime.upload_program(
                     data="my_vqe.py",
                     metadata="my_vqe_metadata.json",

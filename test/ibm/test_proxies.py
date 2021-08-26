@@ -17,7 +17,7 @@ import subprocess
 
 from requests.exceptions import ProxyError
 
-from qiskit_ibm import IBMAccount
+from qiskit_ibm import IBMProvider
 from qiskit_ibm.api.clients import (AuthClient,
                                     VersionClient)
 from qiskit_ibm.api.exceptions import RequestsApiError
@@ -57,9 +57,8 @@ class TestProxies(IBMTestCase):
     @requires_qe_access
     def test_proxies_ibm_account(self, qe_token, qe_url):
         """Should reach the proxy using account.enable."""
-        account = IBMAccount()
-        provider = account.enable(qe_token, qe_url,
-                                  proxies={'urls': VALID_PROXIES})
+        provider = IBMProvider(qe_token, qe_url,
+                               proxies={'urls': VALID_PROXIES})
 
         self.proxy_process.terminate()  # kill to be able of reading the output
 

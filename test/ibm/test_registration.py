@@ -20,7 +20,7 @@ from typing import Dict, Any
 import copy
 
 from requests_ntlm import HttpNtlmAuth
-from qiskit_ibm import IBMAccount
+from qiskit_ibm import IBMProvider
 from qiskit_ibm.apiconstants import QISKIT_IBM_API_URL
 from qiskit_ibm.credentials import (
     Credentials, discover_credentials,
@@ -50,12 +50,11 @@ class TestCredentials(IBMTestCase):
     """Tests for the credential modules."""
 
     def test_load_account_no_credentials(self) -> None:
-        """Test ``load()`` with no credentials available."""
-        account = IBMAccount()
+        """Test load account with no credentials available."""
 
         with custom_qiskitrc(), no_envs(CREDENTIAL_ENV_VARS):
             with self.assertRaises(IBMAccountError) as context_manager:
-                account.load()
+                IBMProvider()
 
         self.assertIn('No IBM Quantum credentials found',
                       str(context_manager.exception))
@@ -64,8 +63,6 @@ class TestCredentials(IBMTestCase):
         """Test overwriting qiskitrc credentials."""
         credentials = Credentials('QISKITRC_TOKEN', url=QISKIT_IBM_API_URL)
         credentials2 = Credentials('QISKITRC_TOKEN_2', url=QISKIT_IBM_API_URL)
-
-        account = IBMAccount()
 
         with custom_qiskitrc():
             store_credentials(credentials)
@@ -83,10 +80,10 @@ class TestCredentials(IBMTestCase):
             with no_envs(CREDENTIAL_ENV_VARS), mock_ibm_provider():
                 # Attempt overwriting.
                 store_credentials(credentials2, overwrite=True)
-                account.load()
+                IBMProvider()
 
         # Ensure that the credentials are the overwritten ones.
-        self.assertEqual(account._credentials, credentials2)
+        self.assertEqual(IBMProvider._credentials, credentials2)
 
     def test_environ_over_qiskitrc(self) -> None:
         """Test credential discovery order."""

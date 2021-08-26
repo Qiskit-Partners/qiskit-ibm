@@ -26,9 +26,8 @@ Modules related to IBM Quantum experiment service.
 You can use the experiment service to query, upload, and retrieve
 experiments, experiment figures, and analysis results. For example::
 
-    from qiskit_ibm import IBMAccount
-    account = IBMAccount()
-    provider = account.load()
+    from qiskit_ibm import IBMProvider
+    provider = IBMProvider()
     experiments = provider.experiment.experiments()
 
 All the available functions can be invoked using the `provider.experiment`

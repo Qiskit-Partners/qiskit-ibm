@@ -23,7 +23,7 @@ from qiskit.exceptions import QiskitError
 from qiskit_ibm.job.exceptions import IBMJobApiError
 from qiskit_ibm.job.ibm_job import IBMJob
 
-from ... import IBMAccount
+from ... import IBMProvider
 from .job_widgets import (make_clear_button,
                           make_labels, create_job_widget)
 from .backend_widget import make_backend_widget
@@ -100,13 +100,11 @@ class IBMDashboard(Subscriber):
         self._jobs_labels = make_labels()  # type: wid.HBox
         self.refresh_jobs_board()
 
-        self.account = IBMAccount()
-
     def _get_backends(self) -> None:
         """Get all the backends accessible with this account."""
 
         ibm_backends = {}
-        for pro in self.account.providers():
+        for pro in IBMProvider.providers():
             pro_name = "{hub}/{group}/{project}".format(hub=pro.credentials.hub,
                                                         group=pro.credentials.group,
                                                         project=pro.credentials.project)
@@ -329,16 +327,15 @@ class IBMDashboardMagic(Magics):
     def ibm_quantum_dashboard(self, line='', cell=None) -> None:
         """A Jupyter magic function to enable the dashboard."""
         # pylint: disable=unused-argument
-        account = IBMAccount()
-        pro = account.providers()
+        pro = IBMProvider.providers()
         if not pro:
             try:
-                account.load()
+                IBMProvider()
             except Exception:
                 raise QiskitError(
                     "Could not load IBM Quantum account from the local file.")
             else:
-                pro = account.providers()
+                pro = IBMProvider.providers()
                 if not pro:
                     raise QiskitError(
                         "No providers found. Must load your IBM Quantum account.")

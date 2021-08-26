@@ -67,11 +67,10 @@ class IBMBackend(Backend):
     can later be used to retrieve the job. An example of this flow::
 
         from qiskit import assemble, transpile
-        from qiskit_ibm import IBMAccount
+        from qiskit_ibm import IBMProvider
         from qiskit.circuit.random import random_circuit
 
-        account = IBMAccount()
-        provider = account.load()
+        provider = IBMProvider()
         backend = provider.backend.ibmq_vigo
         qx = random_circuit(n_qubits=5, depth=4)
         transpiled = transpile(qx, backend=backend)
@@ -722,7 +721,7 @@ class IBMBackend(Backend):
         if self.hub:
             credentials_info = "hub='{}', group='{}', project='{}'".format(
                 self.hub, self.group, self.project)
-        return "<{}('{}') from IBMAccount({})>".format(
+        return "<{}('{}') from IBMProvider({})>".format(
             self.__class__.__name__, self.name(), credentials_info)
 
     def _deprecate_id_instruction(

@@ -21,11 +21,10 @@ The dashboard can be instantiated using
 
 .. jupyter-execute::
 
-    from qiskit_ibm import IBMAccount
+    from qiskit_ibm import IBMProvider
     import qiskit_ibm.jupyter
 
-    account = IBMAccount()
-    account.load()
+    provider = IBMProvider()
 
     %ibm_quantum_dashboard
 

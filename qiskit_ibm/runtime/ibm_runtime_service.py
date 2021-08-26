@@ -53,10 +53,9 @@ class IBMRuntimeService:
     A sample workflow of using the runtime service::
 
         from qiskit import QuantumCircuit
-        from qiskit_ibm import IBMAccount, RunnerResult
+        from qiskit_ibm import IBMProvider, RunnerResult
 
-        account = IBMAccount()
-        provider = account.load()
+        provider = IBMProvider()
         backend = provider.backend.ibmq_qasm_simulator
 
         # List all available programs.

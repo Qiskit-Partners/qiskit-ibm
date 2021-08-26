@@ -24,7 +24,6 @@ from qiskit.test.reference_circuits import ReferenceCircuits
 from qiskit.pulse import Schedule
 from qiskit.providers.exceptions import JobError
 from qiskit.providers.jobstatus import JobStatus
-from qiskit_ibm.ibm_account import IBMAccount
 from qiskit_ibm.ibm_provider import IBMProvider
 from qiskit_ibm.ibm_backend import IBMBackend
 from qiskit_ibm.job import IBMJob
@@ -197,7 +196,6 @@ def get_pulse_schedule(backend: IBMBackend) -> Schedule:
 
 
 def get_provider(
-        account: IBMAccount,
         qe_token: str,
         qe_url: str,
         default: bool = True
@@ -205,7 +203,6 @@ def get_provider(
     """Return a provider for the account.
 
     Args:
-        account: An `IBMAccount` instance.
         qe_token: IBM Quantum token.
         qe_url: IBM Quantum auth URL.
         default: If `True`, the default open access project provider is returned.
@@ -214,15 +211,15 @@ def get_provider(
     Returns:
         A provider, as specified by `default`.
     """
-    provider_to_return = account.enable(qe_token, url=qe_url)  # Default provider.
+    provider_to_return = IBMProvider(qe_token, url=qe_url)  # Default provider.
     if not default:
         # Get a non default provider (i.e.not the default open access project).
-        providers = account.providers()
+        providers = IBMProvider.providers()
         for provider in providers:
             if provider != provider_to_return:
                 provider_to_return = provider
                 break
-    account.disable()
+    IBMProvider.disable_account()
 
     return provider_to_return
 

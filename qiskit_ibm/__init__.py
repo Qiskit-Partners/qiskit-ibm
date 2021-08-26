@@ -57,7 +57,6 @@ Classes
     BackendJobLimit
     IBMBackend
     IBMBackendService
-    IBMAccount
     RunnerResult
 
 Exceptions
@@ -85,11 +84,10 @@ from datetime import datetime, timedelta
 
 from qiskit.providers import BaseBackend, Backend  # type: ignore[attr-defined]
 
-from .ibm_account import IBMAccount
+from .ibm_provider import IBMProvider
 from .ibm_backend import IBMBackend
 from .job import IBMJob  # pylint: disable=cyclic-import
 from .managed import IBMJobManager  # pylint: disable=cyclic-import
-from .ibm_provider import IBMProvider
 from .backendjoblimit import BackendJobLimit
 from .exceptions import *
 from .ibm_backend_service import IBMBackendService

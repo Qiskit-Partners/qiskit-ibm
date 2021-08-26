@@ -19,7 +19,6 @@ from qiskit.test import providers, slow_test
 from qiskit.compiler import transpile
 from qiskit.providers.exceptions import QiskitBackendNotFoundError
 from qiskit.providers.models.backendproperties import BackendProperties
-from qiskit_ibm import IBMAccount
 from qiskit_ibm.ibm_provider import IBMProvider
 from qiskit_ibm.ibm_backend import IBMSimulator, IBMBackend
 from qiskit_ibm.ibm_backend_service import IBMBackendService
@@ -37,11 +36,6 @@ API_URL = 'https://api.quantum-computing.ibm.com/api'
 
 class TestIBMProviderInitialization(IBMTestCase):
     """Tests for the IBMProvider class initialization."""
-
-    def setUp(self):
-        """Initial test setup."""
-        super().setUp()
-        self.account = IBMAccount()
 
     @requires_qe_access
     def test_provider_init_token(self, qe_token, qe_url):
@@ -109,8 +103,7 @@ class TestIBMProviderInitialization(IBMTestCase):
     def test_provider_init_saved_account(self, qe_token, qe_url):
         """Test initializing a provider with credentials from qiskitrc file."""
         with custom_qiskitrc(), no_envs(CREDENTIAL_ENV_VARS):
-            self.account.save(qe_token, url=qe_url)
-            provider = IBMProvider()
+            provider = IBMProvider(qe_token, url=qe_url, save=True)
 
         self.assertIsInstance(provider, IBMProvider)
         self.assertEqual(provider.credentials.token, qe_token)

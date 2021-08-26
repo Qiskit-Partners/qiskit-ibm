@@ -97,7 +97,7 @@ class TestIBMAccountEnableAccount(IBMTestCase):
     @requires_qe_access
     def test_enable_specified_provider(self, qe_token, qe_url):
         """Test enabling an account with a specified provider."""
-        non_default_provider = get_provider(self.account, qe_token, qe_url, default=False)
+        non_default_provider = get_provider(qe_token, qe_url, default=False)
         enabled_provider = self.account.enable(
             token=qe_token, url=qe_url,
             hub=non_default_provider.credentials.hub,
@@ -213,7 +213,7 @@ class TestIBMAccountAccounts(IBMTestCase):
             self.skipTest('Test requires production auth URL')
 
         # Get a non default provider.
-        non_default_provider = get_provider(self.account, qe_token, qe_url, default=False)
+        non_default_provider = get_provider(qe_token, qe_url, default=False)
 
         with custom_qiskitrc(), no_envs(CREDENTIAL_ENV_VARS):
             self.account.save(token=qe_token, url=qe_url,
@@ -277,16 +277,16 @@ class TestIBMAccountAccounts(IBMTestCase):
     def test_disable_account(self, qe_token, qe_url):
         """Test disabling an account """
         self.account.enable(qe_token, qe_url)
-        self.account.disable()
+        self.account.disable_account()
         self.assertIsNone(self.account._credentials)
 
     @requires_qe_access
     def test_active_account(self, qe_token, qe_url):
         """Test active for an account """
-        self.assertIsNone(self.account.active())
+        self.assertIsNone(self.account.active_account())
 
         self.account.enable(qe_token, qe_url)
-        active_account = self.account.active()
+        active_account = self.account.active_account()
         self.assertIsNotNone(active_account)
         self.assertEqual(active_account['token'], qe_token)
         self.assertEqual(active_account['url'], qe_url)

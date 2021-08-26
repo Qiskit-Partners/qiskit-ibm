@@ -71,18 +71,17 @@ simulator_backend = provider.get_backend('ibmq_qasm_simulator')
 ```
 
 ### Using Credentials from qiskitrc file
-As another alternative, you can save the credentials and default project using the `IBMAccount` class:
+As another alternative, you can save the credentials and default project when instantiating the `IBMProvider` class by passing the `save = True` parameter:
 
 ```python
-from qiskit_ibm import IBMAccount
-account = IBMAccount()
-account.save(token='MY_API_TOKEN', hub='ibm-q', group='test', project='default')
+from qiskit_ibm import IBMProvider
+provider = IBMProvider(token='MY_API_TOKEN', hub='ibm-q', group='test', project='default', save=True)
 ```
 
 The command above stores your credentials and default project locally in a configuration file called `qiskitrc`.
 By default, this file is located in `$HOME/.qiskit`, where `$HOME` is your home directory.
 
-Then instantiate the provider without any arguments and access the backends:
+Once saved you can then instantiate the provider without any arguments and access the backends:
 ```python
 from qiskit_ibm import IBMProvider
 provider = IBMProvider()

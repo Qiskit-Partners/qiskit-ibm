@@ -20,7 +20,7 @@ from unittest.mock import patch
 
 from qiskit_ibm.credentials import configrc, Credentials
 from qiskit_ibm.credentials.environ import VARIABLES_MAP
-from qiskit_ibm import IBMAccount
+from qiskit_ibm import IBMProvider
 
 CREDENTIAL_ENV_VARS = VARIABLES_MAP.keys()
 
@@ -129,11 +129,11 @@ def _mocked_initialize_provider(
 
 @contextmanager
 def mock_ibm_provider():
-    """Mock the initialization of ``IBMAccount``, so it does not query the API."""
-    patcher = patch.object(IBMAccount, '_initialize_providers',
+    """Mock the initialization of ``IBMProvider``, so it does not query the API."""
+    patcher = patch.object(IBMProvider, '_initialize_providers',
                            side_effect=_mocked_initialize_provider,
                            autospec=True)
-    patcher2 = patch.object(IBMAccount, '_check_api_version',
+    patcher2 = patch.object(IBMProvider, '_check_api_version',
                             return_value={'new_api': True, 'api-auth': '0.1'})
     patcher.start()
     patcher2.start()

@@ -42,12 +42,11 @@ class IBMJobManager:
     with the Job Manager::
 
         from qiskit import transpile
-        from qiskit_ibm import IBMAccount
+        from qiskit_ibm import IBMProvider
         from qiskit_ibm.managed import IBMJobManager
         from qiskit.circuit.random import random_circuit
 
-        account = IBMAccount()
-        provider = account.load()
+        provider = IBMProvider()
         backend = provider.get_backend('ibmq_qasm_simulator')
 
         # Build a thousand circuits.

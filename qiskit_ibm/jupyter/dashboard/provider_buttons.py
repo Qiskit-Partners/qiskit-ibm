@@ -29,8 +29,7 @@ def _copy_text_thread(button: vue.Btn) -> None:
     """
     old_text = button.children[0]
     hub, group, project = old_text.split('/')
-    pyperclip.copy(f"account = IBMAccount()\n"
-                   f"account.provider(hub='{hub}', group='{group}', project='{project}')"
+    pyperclip.copy(f"IBMProvider(hub='{hub}', group='{group}', project='{project}')"
                    .format(hub=hub, group=group, project=project))
     button.children = ['Copied to clipboard.']
     time.sleep(1)

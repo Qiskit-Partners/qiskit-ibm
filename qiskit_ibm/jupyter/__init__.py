@@ -30,23 +30,17 @@ Detailed information on a single backend
 ========================================
 
 .. jupyter-execute::
-
-    from qiskit_ibm import IBMAccount
-    import qiskit_ibm.jupyter
-
-    account = IBMAccount()
-
-.. jupyter-execute::
     :hide-code:
     :hide-output:
 
-    from qiskit_ibm.test.ibm_account_mock import get_mock_ibm_account
-    account = get_mock_ibm_account('FakeVigo')
+    from qiskit_ibm.test.ibm_provider_mock import mock_get_backend
+    mock_get_backend('FakeVigo')
 
 .. jupyter-execute::
+    from qiskit_ibm import IBMProvider
+    import qiskit_ibm.jupyter
 
-    account.load()
-    provider = account.provider(hub='ibm-q')
+    provider = IBMProvider(hub='ibm-q')
     backend = provider.get_backend('ibmq_vigo')
 
 .. jupyter-execute::
@@ -65,7 +59,7 @@ IBM Quantum dashboard
 
 .. code-block:: python
 
-    from qiskit_ibm import IBMAccount
+    from qiskit_ibm import IBMProvider
     import qiskit_ibm.jupyter
 
     %ibm_quantum_dashboard
