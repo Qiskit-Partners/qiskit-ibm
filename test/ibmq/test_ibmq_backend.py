@@ -17,7 +17,7 @@ from datetime import timedelta, datetime
 from unittest import SkipTest
 from unittest.mock import patch
 
-from qiskit import QuantumCircuit, transpile, assemble
+from qiskit import QuantumCircuit
 from qiskit.providers.models import QasmBackendConfiguration
 from qiskit.test.reference_circuits import ReferenceCircuits
 from qiskit_ibm.ibmqbackend import IBMQBackend
@@ -135,13 +135,6 @@ class TestIBMQBackend(IBMQTestCase):
                     found, should_find,
                     "Reservation {} found={}, used start datetime {}, end datetime {}".format(
                         reserv, found, start_dt, end_dt))
-
-    def test_run_qobj(self):
-        """Test running a Qobj."""
-        qobj = assemble(transpile(ReferenceCircuits.bell(), self.backend), self.backend)
-        with self.assertWarns(DeprecationWarning):
-            job = self.backend.run(qobj)
-        cancel_job(job)
 
     def test_backend_options(self):
         """Test backend options."""

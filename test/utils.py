@@ -17,7 +17,7 @@ import time
 import logging
 from typing import List, Optional
 
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 from qiskit.qobj import QasmQobj
 from qiskit.compiler import assemble, transpile
 from qiskit.test.reference_circuits import ReferenceCircuits
@@ -144,9 +144,12 @@ def submit_job_bad_shots(backend: IBMQBackend) -> IBMQJob:
     Returns:
         Submitted job.
     """
-    qobj = bell_in_qobj(backend=backend)
-    qobj.config.shots = 10000  # Modify the number of shots to be an invalid amount.
-    job_to_fail = backend.run(qobj)
+    # wip
+    qr = QuantumRegister(3)
+    cr = ClassicalRegister(0)
+    circuit = QuantumCircuit(qr, cr)
+    job_to_fail = backend.run(circuit)
+
     return job_to_fail
 
 
@@ -175,8 +178,8 @@ def submit_and_cancel(backend: IBMQBackend) -> IBMQJob:
     Returns:
         Cancelled job.
     """
-    qobj = bell_in_qobj(backend=backend)
-    job = backend.run(qobj)
+    circuit = transpile(ReferenceCircuits.bell(), backend=backend)
+    job = backend.run(circuit)
     cancel_job(job, True)
     return job
 

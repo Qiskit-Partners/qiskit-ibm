@@ -148,7 +148,7 @@ class IBMQBackend(Backend):
     @deprecate_arguments({'qobj': 'circuits'})
     def run(
             self,
-            circuits: Union[QasmQobj, PulseQobj, QuantumCircuit, Schedule,
+            circuits: Union[QuantumCircuit, Schedule,
                             List[Union[QuantumCircuit, Schedule]]],
             job_name: Optional[str] = None,
             job_tags: Optional[List[str]] = None,
@@ -180,9 +180,6 @@ class IBMQBackend(Backend):
             circuits: An individual or a
                 list of :class:`~qiskit.circuits.QuantumCircuit` or
                 :class:`~qiskit.pulse.Schedule` objects to run on the backend.
-                A :class:`~qiskit.qobj.QasmQobj` or a
-                :class:`~qiskit.qobj.PulseQobj` object is also supported but
-                is deprecated.
             job_name: Custom name to be assigned to the job. This job
                 name can subsequently be used as a filter in the
                 :meth:`jobs()` method. Job names do not need to be unique.
@@ -272,40 +269,29 @@ class IBMQBackend(Backend):
         if not self.configuration().simulator:
             self._deprecate_id_instruction(circuits)
 
-        if isinstance(circuits, (QasmQobj, PulseQobj)):
-            if not self.qobj_warning_issued:
-                warnings.warn("Passing a Qobj to Backend.run is deprecated and will "
-                              "be removed in a future release. Please pass in circuits "
-                              "or pulse schedules instead.", DeprecationWarning,
-                              stacklevel=3)  # need level 3 because of decorator
-                self.qobj_warning_issued = True
-            qobj = circuits
-            if sim_method and not hasattr(qobj.config, 'method'):
-                qobj.config.method = sim_method
-        else:
-            qobj_header = run_config.pop('qobj_header', None)
-            header = header or qobj_header
-            run_config_dict = self._get_run_config(
-                qobj_header=header,
-                shots=shots,
-                memory=memory,
-                qubit_lo_freq=qubit_lo_freq,
-                meas_lo_freq=meas_lo_freq,
-                schedule_los=schedule_los,
-                meas_level=meas_level,
-                meas_return=meas_return,
-                memory_slots=memory_slots,
-                memory_slot_size=memory_slot_size,
-                rep_time=rep_time,
-                rep_delay=rep_delay,
-                init_qubits=init_qubits,
-                use_measure_esp=use_measure_esp,
-                **run_config)
-            if parameter_binds:
-                run_config_dict['parameter_binds'] = parameter_binds
-            if sim_method and 'method' not in run_config_dict:
-                run_config_dict['method'] = sim_method
-            qobj = assemble(circuits, self, **run_config_dict)
+        qobj_header = run_config.pop('qobj_header', None)
+        header = header or qobj_header
+        run_config_dict = self._get_run_config(
+            qobj_header=header,
+            shots=shots,
+            memory=memory,
+            qubit_lo_freq=qubit_lo_freq,
+            meas_lo_freq=meas_lo_freq,
+            schedule_los=schedule_los,
+            meas_level=meas_level,
+            meas_return=meas_return,
+            memory_slots=memory_slots,
+            memory_slot_size=memory_slot_size,
+            rep_time=rep_time,
+            rep_delay=rep_delay,
+            init_qubits=init_qubits,
+            use_measure_esp=use_measure_esp,
+            **run_config)
+        if parameter_binds:
+            run_config_dict['parameter_binds'] = parameter_binds
+        if sim_method and 'method' not in run_config_dict:
+            run_config_dict['method'] = sim_method
+        qobj = assemble(circuits, self, **run_config_dict)
 
         return self._submit_job(qobj, job_name, job_tags, experiment_id)
 
@@ -832,7 +818,7 @@ class IBMQSimulator(IBMQBackend):
     @deprecate_arguments({'qobj': 'circuits'})
     def run(    # type: ignore[override]
             self,
-            circuits: Union[QasmQobj, PulseQobj, QuantumCircuit, Schedule,
+            circuits: Union[QuantumCircuit, Schedule,
                             List[Union[QuantumCircuit, Schedule]]],
             job_name: Optional[str] = None,
             job_tags: Optional[List[str]] = None,
@@ -847,9 +833,6 @@ class IBMQSimulator(IBMQBackend):
             circuits: An individual or a
                 list of :class:`~qiskit.circuits.QuantumCircuit` or
                 :class:`~qiskit.pulse.Schedule` objects to run on the backend.
-                A :class:`~qiskit.qobj.QasmQobj` or a
-                :class:`~qiskit.qobj.PulseQobj` object is also supported but
-                is deprecated.
             job_name: Custom name to be assigned to the job. This job
                 name can subsequently be used as a filter in the
                 :meth:`jobs` method. Job names do not need to be unique.

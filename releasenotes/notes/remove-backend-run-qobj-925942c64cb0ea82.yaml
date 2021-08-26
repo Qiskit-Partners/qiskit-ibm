@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    Passing a Qobj to `Backend.run` has been removed. Please pass in circuits
+    or pulse schedules instead.
