@@ -27,7 +27,7 @@ from qiskit_ibm.credentials import (
     read_credentials_from_qiskitrc, store_credentials,
     store_preferences, HubGroupProject)
 from qiskit_ibm.credentials import configrc
-from qiskit_ibm.exceptions import IBMAccountError
+from qiskit_ibm.exceptions import IBMProviderError
 
 from ..ibm_test_case import IBMTestCase
 from ..contextmanagers import (custom_envs, no_envs, custom_qiskitrc, CREDENTIAL_ENV_VARS,
@@ -53,7 +53,7 @@ class TestCredentials(IBMTestCase):
         """Test load account with no credentials available."""
 
         with custom_qiskitrc(), no_envs(CREDENTIAL_ENV_VARS):
-            with self.assertRaises(IBMAccountError) as context_manager:
+            with self.assertRaises(IBMProviderError) as context_manager:
                 IBMProvider()
 
         self.assertIn('No IBM Quantum credentials found',

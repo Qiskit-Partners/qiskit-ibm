@@ -20,42 +20,33 @@ class IBMError(QiskitError):
     pass
 
 
-class IBMAccountError(IBMError):
-    """Base class for errors raised by account management."""
-    pass
-
-
-class IBMAccountValueError(IBMError):
-    """Value errors raised by account management."""
-
-
-class IBMAccountCredentialsNotFound(IBMAccountError):
-    """Errors raised when credentials are not found."""
-    pass
-
-
-class IBMAccountCredentialsInvalidFormat(IBMAccountError):
-    """Errors raised when the credentials format is invalid."""
-    pass
-
-
-class IBMAccountCredentialsInvalidToken(IBMAccountError):
-    """Errors raised when an IBM Quantum token is invalid."""
-    pass
-
-
-class IBMAccountCredentialsInvalidUrl(IBMAccountError):
-    """Errors raised when an IBM Quantum URL is invalid."""
-    pass
-
-
-class IBMProviderError(IBMAccountError):
-    """Errors related to provider handling."""
+class IBMProviderError(IBMError):
+    """Base class for rrrors raise by IBMProvider."""
     pass
 
 
 class IBMProviderValueError(IBMProviderError):
-    """Value errors raised by IBM provider."""
+    """Value errors raised by IBMProvider."""
+    pass
+
+
+class IBMProviderCredentialsNotFound(IBMProviderError):
+    """Errors raised when credentials are not found."""
+    pass
+
+
+class IBMProviderCredentialsInvalidFormat(IBMProviderError):
+    """Errors raised when the credentials format is invalid."""
+    pass
+
+
+class IBMProviderCredentialsInvalidToken(IBMProviderError):
+    """Errors raised when an IBM Quantum token is invalid."""
+    pass
+
+
+class IBMProviderCredentialsInvalidUrl(IBMProviderError):
+    """Errors raised when an IBM Quantum URL is invalid."""
     pass
 
 

@@ -65,12 +65,12 @@ Exceptions
     :toctree: ../stubs/
 
     IBMError
-    IBMAccountError
-    IBMAccountValueError
-    IBMAccountCredentialsNotFound
-    IBMAccountCredentialsInvalidFormat
-    IBMAccountCredentialsInvalidToken
-    IBMAccountCredentialsInvalidUrl
+    IBMProviderError
+    IBMProviderValueError
+    IBMProviderCredentialsNotFound
+    IBMProviderCredentialsInvalidFormat
+    IBMProviderCredentialsInvalidToken
+    IBMProviderCredentialsInvalidUrl
     IBMBackendError
     IBMBackendApiError
     IBMBackendApiProtocolError

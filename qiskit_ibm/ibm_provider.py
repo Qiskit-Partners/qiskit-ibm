@@ -41,9 +41,9 @@ from .utils.json_decoder import decode_backend_configuration
 from .random.ibm_random_service import IBMRandomService  # pylint: disable=cyclic-import
 from .experiment import IBMExperimentService  # pylint: disable=cyclic-import
 from .runtime.ibm_runtime_service import IBMRuntimeService  # pylint: disable=cyclic-import
-from .exceptions import (IBMNotAuthorizedError, IBMInputValueError, IBMAccountCredentialsNotFound,
-                         IBMAccountCredentialsInvalidFormat, IBMAccountCredentialsInvalidToken,
-                         IBMAccountCredentialsInvalidUrl, IBMProviderError, IBMProviderValueError)
+from .exceptions import (IBMNotAuthorizedError, IBMInputValueError, IBMProviderCredentialsNotFound,
+                         IBMProviderCredentialsInvalidFormat, IBMProviderCredentialsInvalidToken,
+                         IBMProviderCredentialsInvalidUrl, IBMProviderError, IBMProviderValueError)
 from .runner_result import RunnerResult  # pylint: disable=cyclic-import
 
 logger = logging.getLogger(__name__)
@@ -203,13 +203,13 @@ class IBMProvider(Provider):
                 * verify (bool): verify the server's TLS certificate.
 
         Raises:
-            IBMAccountCredentialsInvalidFormat: If the default provider stored on
+            IBMProviderCredentialsInvalidFormat: If the default provider stored on
                 disk could not be parsed.
-            IBMAccountCredentialsNotFound: If no IBM Quantum credentials
+            IBMProviderCredentialsNotFound: If no IBM Quantum credentials
                 can be found.
-            IBMAccountCredentialsInvalidUrl: If the URL specified is not
+            IBMProviderCredentialsInvalidUrl: If the URL specified is not
                 a valid IBM Quantum authentication URL.
-            IBMAccountCredentialsInvalidToken: If the `token` is not a valid
+            IBMProviderCredentialsInvalidToken: If the `token` is not a valid
                 IBM Quantum token.
             IBMProviderValueError: If only one or two parameters from `hub`, `group`,
                 `project` are specified.
@@ -296,7 +296,7 @@ class IBMProvider(Provider):
 
         if token:
             if not isinstance(token, str):
-                raise IBMAccountCredentialsInvalidToken(
+                raise IBMProviderCredentialsInvalidToken(
                     'Invalid IBM Quantum token '
                     'found: "{}" of type {}.'.format(token, type(token)))
             url = url or os.getenv('QISKIT_IBM_API_URL') or QISKIT_IBM_API_URL
@@ -307,14 +307,14 @@ class IBMProvider(Provider):
             try:
                 saved_credentials, preferences = discover_credentials()
             except HubGroupProjectInvalidStateError as ex:
-                raise IBMAccountCredentialsInvalidFormat(
+                raise IBMProviderCredentialsInvalidFormat(
                     'Invalid provider (hub/group/project) data found {}'
                     .format(str(ex))) from ex
 
             credentials_list = list(saved_credentials.values())
 
             if not credentials_list:
-                raise IBMAccountCredentialsNotFound(
+                raise IBMProviderCredentialsNotFound(
                     'No IBM Quantum credentials found.')
 
             account_credentials = credentials_list[0]
@@ -331,7 +331,7 @@ class IBMProvider(Provider):
 
         # Check the URL is a valid authentication URL.
         if not version_info['new_api'] or 'api-auth' not in version_info:
-            raise IBMAccountCredentialsInvalidUrl(
+            raise IBMProviderCredentialsInvalidUrl(
                 'The URL specified ({}) is not an IBM Quantum authentication URL. '
                 'Valid authentication URL: {}.'
                 .format(account_credentials.url, QISKIT_IBM_API_URL))
@@ -731,10 +731,10 @@ class IBMProvider(Provider):
         """Disable the account currently in use for the session.
 
         Raises:
-            IBMAccountCredentialsNotFound: If no account is in use for the session.
+            IBMProviderCredentialsNotFound: If no account is in use for the session.
         """
         if not cls._credentials:
-            raise IBMAccountCredentialsNotFound(
+            raise IBMProviderCredentialsNotFound(
                 'No IBM Quantum account is in use for the session.')
         cls._credentials = None
         cls._providers = OrderedDict()
@@ -812,19 +812,19 @@ class IBMProvider(Provider):
                 * verify (bool): If False, ignores SSL certificates errors
 
         Raises:
-            IBMAccountCredentialsInvalidUrl: If the `url` is not a valid
+            IBMProviderCredentialsInvalidUrl: If the `url` is not a valid
                 IBM Quantum authentication URL.
-            IBMAccountCredentialsInvalidToken: If the `token` is not a valid
+            IBMProviderCredentialsInvalidToken: If the `token` is not a valid
                 IBM Quantum token.
             IBMProviderValueError: If only one or two parameters from `hub`, `group`,
                 `project` are specified.
         """
         if url != QISKIT_IBM_API_URL:
-            raise IBMAccountCredentialsInvalidUrl(
+            raise IBMProviderCredentialsInvalidUrl(
                 'Invalid IBM Quantum credentials found.')
 
         if not token or not isinstance(token, str):
-            raise IBMAccountCredentialsInvalidToken(
+            raise IBMProviderCredentialsInvalidToken(
                 'Invalid IBM Quantum token '
                 'found: "{}" of type {}.'.format(token, type(token)))
 
@@ -850,20 +850,20 @@ class IBMProvider(Provider):
         """Delete the saved account from disk.
 
         Raises:
-            IBMAccountCredentialsNotFound: If no valid IBM Quantum
+            IBMProviderCredentialsNotFound: If no valid IBM Quantum
                 credentials can be found on disk.
-            IBMAccountCredentialsInvalidUrl: If invalid IBM Quantum
+            IBMProviderCredentialsInvalidUrl: If invalid IBM Quantum
                 credentials are found on disk.
         """
         stored_credentials, _ = read_credentials_from_qiskitrc()
         if not stored_credentials:
-            raise IBMAccountCredentialsNotFound(
+            raise IBMProviderCredentialsNotFound(
                 'No IBM Quantum credentials found on disk.')
 
         credentials = list(stored_credentials.values())[0]
 
         if credentials.url != QISKIT_IBM_API_URL:
-            raise IBMAccountCredentialsInvalidUrl(
+            raise IBMProviderCredentialsInvalidUrl(
                 'Invalid IBM Quantum credentials found on disk. ')
 
         remove_credentials(credentials)
@@ -876,7 +876,7 @@ class IBMProvider(Provider):
             A dictionary with information about the account stored on disk.
 
         Raises:
-            IBMAccountCredentialsInvalidUrl: If invalid IBM Quantum
+            IBMProviderCredentialsInvalidUrl: If invalid IBM Quantum
                 credentials are found on disk.
         """
         stored_credentials, _ = read_credentials_from_qiskitrc()
@@ -886,7 +886,7 @@ class IBMProvider(Provider):
         credentials = list(stored_credentials.values())[0]
 
         if credentials.url != QISKIT_IBM_API_URL:
-            raise IBMAccountCredentialsInvalidUrl(
+            raise IBMProviderCredentialsInvalidUrl(
                 'Invalid IBM Quantum credentials found on disk.')
 
         return {

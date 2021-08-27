@@ -64,14 +64,14 @@ A lot of other classes have been renamed but may not be directly used by most us
 | IBMQJobManager  | IBMJobManager |
 | IBMQRandomService  | IBMRandomService |
 | IBMQError | IBMError |
-| IBMQAccountError | IBMAccountError |
-| IBMQAccountValueError | IBMAccountValueError |
-| IBMQAccountCredentialsNotFound | IBMAccountCredentialsNotFound |
-| IBMQAccountCredentialsInvalidFormat | IBMAccountCredentialsInvalidFormat |
-| IBMQAccountCredentialsInvalidToken | IBMAccountCredentialsInvalidToken |
-| IBMQAccountCredentialsInvalidUrl | IBMAccountCredentialsInvalidUrl |
-| IBMQAccountMultipleCredentialsFound | IBMAccountMultipleCredentialsFound |
 | IBMQProviderError | IBMProviderError |
+| IBMQAccountError | None (Removed) |
+| IBMQAccountValueError | IBMProviderValueError |
+| IBMQAccountCredentialsNotFound | IBMProviderCredentialsNotFound |
+| IBMQAccountCredentialsInvalidFormat | IBMProviderCredentialsInvalidFormat |
+| IBMQAccountCredentialsInvalidToken | IBMProviderCredentialsInvalidToken |
+| IBMQAccountCredentialsInvalidUrl | IBMProviderCredentialsInvalidUrl |
+| IBMQAccountMultipleCredentialsFound | None (Removed) |
 | IBMQBackendError | IBMBackendError |
 | IBMQBackendApiProtocolError | IBMBackendApiProtocolError |
 | IBMQBackendValueError | IBMBackendValueError |
